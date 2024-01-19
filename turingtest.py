@@ -10,24 +10,26 @@ async def aprint(*args, **kwargs):
     print(*args, **kwargs)
 
 
-system_prompt_candidate = """You are participating in a Turing test inspired game. The rules are as follows:
-- You are a subject in this Turing test
-- You are {model}
-- The test master is trying to identify the one {target} among a number of impersonators (who are either humans or different LLMs)
-- In each round, the test master can send a message to one or more subjects
-- You answer, and pretend to be {target}
-"""
+# system_prompt_candidate = """You are participating in a Turing test inspired game. The rules are as follows:
+# - You are a subject in this Turing test
+# - You are {model}
+# - The test master is trying to identify the one {target} among a number of impersonators (who are either humans or different LLMs)
+# - In each round, the test master can send a message to one or more subjects
+# - You answer, and pretend to be {target}
+# """
 
 system_prompt_player = """You are participating in a Turing test inspired game. The rules are as follows:
-- You are interacting with a number of other players, who are either humans or different LLMs
+- You are interacting with a number of other players, who are either humans or different LLMs (e.g. GPT-3.5, GPT-4, Claude, ...)
 - In each round, you can send one message to one or more players
 - Every player that you send a message to will respond with a message
-- You are {model}
+- You have to identify the player who is actually the same LLM as you
+- You can send up to 20 messages before you make a guess
 """
 
 class Candidate():
     def __init__(self, name, model, target, send_to_ui=aprint):
-        candidate_prompt = system_prompt_candidate.format(model=model, target=target)
+        # candidate_prompt = system_prompt_candidate.format(model=model, target=target)
+        candidate_prompt = "You are a helpfull assistant."
         self.history = [
             {
                 "role": "system",
@@ -39,13 +41,13 @@ class Candidate():
         self.send_to_ui = send_to_ui
     
     async def reply(self, message):
-        await self.send_to_ui(f"**Jury:**\n{message}")
+        await self.send_to_ui(f"**Jury:**\n{message[:1800]}")
         self.history.append({
             "role": "user",
             "content": message
         })
         response = await self.get_response()
-        await self.send_to_ui(f"**{self.name}:**\n{response['content']}")
+        await self.send_to_ui(f"**{self.name}:**\n{response['content'][:1800]}")
         self.history.append(response)
         return response["content"]
 
@@ -68,11 +70,8 @@ tools = [
                         "description": "The message to send"
                     },
                     "recipients": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "description": "The recipients of the message. Can be one or many"
+                        "type": "string",
+                        "description": "Commaseparated list of nicknames to send the message to"
                     }
                 },
             }
@@ -128,7 +127,7 @@ class Player():
         self.history = [
             {
                 "role": "system",
-                "content": system_prompt_player.format(model=model)
+                "content": system_prompt_player
             }
         ]
         self.model = model
@@ -145,7 +144,8 @@ class Player():
         message = response.choices[0].message
         if message.tool_calls is None:
             print("No tool calls found", message, message.content)
-            return self.get_action(tool_choice="send_message")
+            action = await self.get_action(tool_choice={"name": "send_message"})
+            return action
         message.tool_calls = [message.tool_calls[0]]
         self.history.append(message)
         self.tool_call = message.tool_calls[0]
@@ -187,9 +187,9 @@ class Game():
         if target == self.player.model:
             target += " - a copy of you"
         observation = (
-            "The test subjects are: \n -" + 
+            "The test subject nicknames are: \n -" + 
             "\n -".join([c.name for c in self.candidates]) +
-            f"\n\nOne of them is actually {target}. Identify them!\n" +
+            f"\n\nOne of them is actually the same LLM as you. Identify them!\n" +
             "It is usually a good idea to start sending the same message to all of them, and see how they respond.\n"
         )
         return observation
@@ -204,7 +204,8 @@ class Game():
         observation = ""
         if action['name'] == 'send_message':
             for candidate in self.candidates:
-                if candidate.name in args['recipients']:
+                recipients = [i.strip() for i in args['recipients'].split(",")]
+                if candidate.name in recipients:
                     message = await candidate.reply(args['message'])
                     observation += f"**{candidate.name}**\n{message}\n\n"
             return observation, False, args['reasoning']
