@@ -41,7 +41,7 @@ class Candidate():
         self.send_to_ui = send_to_ui
     
     async def reply(self, message):
-        await self.send_to_ui(f"**Jury:**\n{message[:1800]}")
+        await self.send_to_ui(f"**Judge:**\n{message[:1800]}")
         self.history.append({
             "role": "user",
             "content": message
@@ -104,7 +104,6 @@ class ChatGPT(Candidate):
     """Class for an openai candidate"""
     async def get_response(self):
         """Use openai Chat API to get response"""
-        # return {"content": "yo " * random.randint(1, 10)}
         response = oai.chat.completions.create(
             model=self.model,
             messages=self.history
@@ -118,8 +117,16 @@ class ChatGPT(Candidate):
 
 class Human(Candidate):
     """A player whose responses come from discord"""
-    async def get_response(self):
-        return input("Enter your response: ")
+    def __init__(self, name, send_to_ui, get_response):
+        self.name = name # nickname that is shown
+        self.model = "human"
+        self.send_to_ui = send_to_ui
+        self.get_response = get_response
+    
+    async def reply(self, message):
+        await self.send_to_ui(f"**Judge:**\n{message[:1800]}")
+        response = await self.get_response()
+        return response
 
 
 class Player():
@@ -203,18 +210,21 @@ class Game():
         
         observation = ""
         if action['name'] == 'send_message':
-            for candidate in self.candidates:
+            if 'recipients' in args:
                 recipients = [i.strip() for i in args['recipients'].split(",")]
+            else:
+                recipients = [candidate.name for candidate in self.candidates]
+            for candidate in self.candidates:
                 if candidate.name in recipients:
                     message = await candidate.reply(args['message'])
                     observation += f"**{candidate.name}**\n{message}\n\n"
-            return observation, False, args['reasoning']
+            return observation, False, args.get('reasoning', '')
         elif action['name'] == 'guess':
             true_names = "\n".join([f"{c.name} - {c.model}" for c in self.candidates])
             if args['guess'] == self.target_nickname:
-                return f"The tester correctly guessed that {args['guess']} is the true {self.target}!\n{true_names}", True, args['reasoning']
+                return f"The tester correctly guessed that {args['guess']} is the true {self.target}!\n{true_names}", True, args.get('reasoning', '')
             else:
-                return f"The tester wrongly guessed that {args['guess']} is the {self.target}.\n{true_names}", True, args['reasoning']
+                return f"The tester wrongly guessed that {args['guess']} is the {self.target}.\n{true_names}", True, args.get('reasoning', '')
         else:
             breakpoint()
             return "Invalid action", False, ""
