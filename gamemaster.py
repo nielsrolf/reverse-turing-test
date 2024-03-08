@@ -4,7 +4,7 @@ from interactions import SlashCommandChoice
 from dotenv import load_dotenv
 import os
 import random
-from turingtest import Game, Candidate, Human, ChatGPT, Player
+from turingtest import Game, Candidate, Human, ChatGPT, Player, Perplexity
 from listen_to_humans import ThreadListener
 
 load_dotenv()
@@ -13,9 +13,16 @@ load_dotenv()
 bot = interactions.Client(token=os.environ["ALAN"])
 
 llms = [
-    "gpt-3.5-turbo",
-    "gpt-4-1106-preview"
+    "gpt-3.5-turbo-1106",
+    "gpt-4-1106-preview",
+    "pplx-7b-chat",
+    "pplx-70b-chat",
+    "llama-2-70b-chat",
+    "codellama-34b-instruct",
+    "mistral-7b-instruct",
+    "mixtral-8x7b-instruct"
 ]
+
 
 names = [
     "Alice",
@@ -74,23 +81,16 @@ names = [
     required=False,
     opt_type=OptionType.BOOLEAN,
 )
-@slash_option(
-    name="target",
-    description="Who is the target?",
-    required=False,
-    opt_type=OptionType.STRING,
-)
 async def new_game(
     ctx: interactions.SlashContext,
     tester: str,
     bot_impersonators: int,
-    with_human: bool=False,
-    target: str=None
+    with_human: bool=False
 ):
     if tester != 'human':
         tester = [i for i in llms if tester in i][0]
     
-    target = target or tester
+    target = tester
     init_msg = f"Alright, let's play a new game where one {tester} needs to find {target} among {bot_impersonators} impersonator bots"
     if with_human:
         init_msg += " and one human"
@@ -126,7 +126,10 @@ async def new_game(
             model = tester
         else:
             model = random.choice(impersonator_llms)
-        candidate = ChatGPT(nickname, model, target, thread.send)
+        if model.startswith("gpt"):
+            candidate = ChatGPT(nickname, model, target, thread.send)
+        else:
+            candidate = Perplexity(nickname, model, target, thread.send)
         candidates.append(candidate)
     
     # Start the game!
@@ -135,7 +138,8 @@ async def new_game(
     done = False
     while not done:
         observation, done, reasoning = await game.play_round(observation)
-        await ctx.send(f"Thoughts: {reasoning}")
+        if reasoning.strip() != "":
+            await ctx.send(f"Thoughts: {reasoning}")
     
     await ctx.channel.send(observation)
         

@@ -1,9 +1,16 @@
 from openai import OpenAI
 import json
 import random
+import requests
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 oai = OpenAI()
+pplx = OpenAI(api_key=os.environ['PERPLEXITY'], base_url="https://api.perplexity.ai")
 
 
 async def aprint(*args, **kwargs):
@@ -115,6 +122,21 @@ class ChatGPT(Candidate):
         }
 
 
+
+class Perplexity(Candidate):
+    async def get_response(self):
+        """Use openai Chat API to get response"""
+        response = pplx.chat.completions.create(
+            model=self.model,
+            messages=self.history
+        )
+        message = response.choices[0].message
+        return {
+            "role": "assistant",
+            "content": message.content
+        }
+
+
 class Human(Candidate):
     """A player whose responses come from discord"""
     def __init__(self, name, send_to_ui, get_response):
@@ -201,6 +223,20 @@ class Game():
         )
         return observation
     
+    def save_to_leaderboard(self, win):
+        try:
+            with open('games.json', 'r') as f:
+                games = json.load(f)
+        except:
+            games = []
+        games.append({
+            "tester": self.player.model,
+            "subjects": sorted([i.model for i in self.candidates]),
+            "win": win
+        })
+        with open("games.json", "w") as f:
+            json.dump(games, f)
+    
     async def play_round(self, observation):
         """Play one round of the game:
         - player does their turn
@@ -220,11 +256,11 @@ class Game():
                     observation += f"**{candidate.name}**\n{message}\n\n"
             return observation, False, args.get('reasoning', '')
         elif action['name'] == 'guess':
+            self.save_to_leaderboard(args['guess'] == self.target_nickname)
             true_names = "\n".join([f"{c.name} - {c.model}" for c in self.candidates])
             if args['guess'] == self.target_nickname:
                 return f"The tester correctly guessed that {args['guess']} is the true {self.target}!\n{true_names}", True, args.get('reasoning', '')
             else:
                 return f"The tester wrongly guessed that {args['guess']} is the {self.target}.\n{true_names}", True, args.get('reasoning', '')
         else:
-            breakpoint()
             return "Invalid action", False, ""
