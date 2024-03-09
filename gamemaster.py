@@ -4,7 +4,7 @@ from interactions import SlashCommandChoice
 from dotenv import load_dotenv
 import os
 import random
-from turingtest import Game, Candidate, Human, ChatGPT, Player, Perplexity
+from turingtest import Game, Candidate, Human, ChatGPT, Player, Perplexity, Claude, ClaudePlayer
 from listen_to_humans import ThreadListener
 
 load_dotenv()
@@ -12,14 +12,22 @@ load_dotenv()
 
 bot = interactions.Client(token=os.environ["ALAN"])
 
+# llms = [
+#     "gpt-3.5-turbo-1106",
+#     "gpt-4-1106-preview",
+#     "pplx-7b-chat",
+#     "pplx-70b-chat",
+#     "llama-2-70b-chat",
+#     "codellama-34b-instruct",
+#     "mistral-7b-instruct",
+#     "mixtral-8x7b-instruct"
+# ]
+
 llms = [
     "gpt-3.5-turbo-1106",
-    "gpt-4-1106-preview",
-    "pplx-7b-chat",
-    "pplx-70b-chat",
-    "llama-2-70b-chat",
-    "codellama-34b-instruct",
-    "mistral-7b-instruct",
+    "gpt-4-turbo-preview",
+    # "mistral-7b-instruct",
+    "claude-3-opus-20240229",
     "mixtral-8x7b-instruct"
 ]
 
@@ -64,6 +72,7 @@ names = [
     required=True,
     opt_type=OptionType.STRING,
     choices=[
+        SlashCommandChoice(name="claude-3-opus-20240229", value='claude-3'),
         SlashCommandChoice(name="gpt-4", value='gpt-4'),
         SlashCommandChoice(name="gpt-3.5", value='gpt-3.5'),
         # SlashCommandChoice(name="human", value='human'),
@@ -101,7 +110,10 @@ async def new_game(
     nicknames = names[:candidates]
     
     # Create the tester
-    player = Player(tester)
+    if tester.startswith("gpt"):
+        player = Player(tester)
+    else:
+        player = ClaudePlayer(tester)
     candidates = []
     
     # Create the human
@@ -128,6 +140,8 @@ async def new_game(
             model = random.choice(impersonator_llms)
         if model.startswith("gpt"):
             candidate = ChatGPT(nickname, model, target, thread.send)
+        elif model.startswith("claude"):
+            candidate = Claude(nickname, model, target, thread.send)
         else:
             candidate = Perplexity(nickname, model, target, thread.send)
         candidates.append(candidate)

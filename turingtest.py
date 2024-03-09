@@ -1,16 +1,18 @@
 from openai import OpenAI
 import json
-import random
-import requests
 import os
+import anthropic
 from dotenv import load_dotenv
-
+from claude_with_tools import get_response_anthropic_with_tools
 
 load_dotenv()
 
 
 oai = OpenAI()
 pplx = OpenAI(api_key=os.environ['PERPLEXITY'], base_url="https://api.perplexity.ai")
+anthr = anthropic.Anthropic(
+    api_key=os.environ.get("ANTHROPIC_API_KEY"),
+)
 
 
 async def aprint(*args, **kwargs):
@@ -137,6 +139,26 @@ class Perplexity(Candidate):
         }
 
 
+class Claude(Candidate):
+    async def get_response(self):
+        system_msg = [msg for msg in self.history if msg['role']=='system']
+        system_msg = None if len(system_msg) == 0 else system_msg[0]['content']
+        history = [msg for msg in self.history if not msg['role']=='system']
+        message = anthr.messages.create(
+            model=self.model,
+            messages=history,
+            temperature=0.7,
+            max_tokens=500,
+            system=system_msg
+        )
+        response_msg = {
+            'role': 'assistant',
+            'content': message.content[0].text
+        }
+        return response_msg
+        
+
+
 class Human(Candidate):
     """A player whose responses come from discord"""
     def __init__(self, name, send_to_ui, get_response):
@@ -200,6 +222,40 @@ class Player():
                     "content": observation,
                 }
             )
+        action = await self.get_action()
+        return action
+
+
+
+class ClaudePlayer():
+    def __init__(self, model):
+        self.model = model
+        self.example_action = {
+            "name": "send_message",
+            "parameters": {
+                "reasoning": "This is an example",
+                "message": "Hello",
+                "recipients": 'Alan, Max'
+            }
+        }
+        self.history = [
+            {
+                "role": "system",
+                "content": system_prompt_player
+            }
+        ]
+        
+    async def get_action(self):
+        """Use openai API to get action"""
+        message, action = get_response_anthropic_with_tools(self.model, self.history, 0.7, tools=tools, example_action=self.example_action)
+        self.history.append(message)
+        return action
+
+    async def do_turn(self, observation):
+        self.history.append({
+            "role": "user",
+            "content": observation
+        })
         action = await self.get_action()
         return action
     
