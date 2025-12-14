@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turing Test Game Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: flex;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3em;
+            color: #495057;
+        }
+
+        .game-list {
+            list-style: none;
+        }
+
+        .game-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .game-item:hover {
+            background: #e9ecef;
+        }
+
+        .game-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .game-item.win {
+            border-left: 4px solid #28a745;
+        }
+
+        .game-item.loss {
+            border-left: 4px solid #dc3545;
+        }
+
+        .game-item .game-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .game-item .game-meta {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .game-item.active .game-meta {
+            opacity: 0.9;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .no-game-selected {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-game-selected svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .game-details {
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .game-header h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        .info-item .label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+
+        .info-item .value {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .candidate-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+        }
+
+        .candidate-card.target {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .candidate-card .name {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 3px;
+        }
+
+        .candidate-card .model {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .rounds {
+            margin-top: 30px;
+        }
+
+        .round {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .round-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .round-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .round-action {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .round-action.guess {
+            background: #764ba2;
+        }
+
+        .reasoning {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .reasoning .label {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .reasoning .text {
+            color: #495057;
+            font-style: italic;
+        }
+
+        .message-section {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .message-section .label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .message-text {
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+            margin-bottom: 15px;
+        }
+
+        .recipients {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .recipient-tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .responses {
+            display: grid;
+            gap: 12px;
+        }
+
+        .response {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .response-header {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .response-text {
+            color: #495057;
+            white-space: pre-wrap;
+        }
+
+        .guess-section {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .guess-result {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .guess-result.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+
+        .guess-result.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+        }
+
+        .guess-result .icon {
+            font-size: 2em;
+        }
+
+        .guess-result .text {
+            flex: 1;
+        }
+
+        .guess-result .guess-label {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Turing Test Game Viewer</h1>
+            <p>Watch AI judges try to identify their twins</p>
+        </header>
+
+        <div class="content">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Game History</h2>
+                </div>
+                <ul id="game-list" class="game-list">
+                    <li class="loading">Loading games</li>
+                </ul>
+            </aside>
+
+            <main class="main-content" id="main-content">
+                <div class="no-game-selected">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <h2>No Game Selected</h2>
+                    <p>Select a game from the sidebar to view its details</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let games = [];
+        let folderPath = 'experiment1_results'; // Default folder
+
+        // Prompt for folder path
+        function promptForFolder() {
+            const newPath = prompt('Enter the folder name/path containing game results:', folderPath);
+            if (newPath && newPath.trim()) {
+                folderPath = newPath.trim();
+                loadGames();
+            }
+        }
+
+        // Load games from a folder
+        async function loadGames() {
+            try {
+                // For web, we need a file listing. Try to load a manifest or list files manually
+                // Since we can't list directory contents in a browser, we'll try common patterns
+                // Alternative: Generate an index.json file with the list of game files
+
+                // Try to load index.json first (list of game files)
+                try {
+                    const indexResponse = await fetch(`${folderPath}/index.json`);
+                    if (indexResponse.ok) {
+                        const fileList = await indexResponse.json();
+                        await loadGamesFromList(fileList);
+                        return;
+                    }
+                } catch (e) {
+                    // Index doesn't exist, try sequential loading
+                }
+
+                // Fallback: Try loading game_trajectories.json (old format)
+                const response = await fetch('game_trajectories.json');
+                if (response.ok) {
+                    games = await response.json();
+                    renderGameList();
+                    return;
+                }
+
+                throw new Error('No games found. Generate an index.json or use the old game_trajectories.json format.');
+            } catch (error) {
+                document.getElementById('game-list').innerHTML = `
+                    <li style="padding: 20px; text-align: center; color: #dc3545;">
+                        <strong>Error loading games</strong><br>
+                        <span style="font-size: 0.9em;">${error.message}</span><br>
+                        <button onclick="promptForFolder()" style="margin-top: 10px; padding: 5px 10px; cursor: pointer;">Change Folder</button>
+                    </li>
+                `;
+            }
+        }
+
+        async function loadGamesFromList(fileList) {
+            games = [];
+            const promises = fileList.map(async (filename) => {
+                try {
+                    const response = await fetch(`${folderPath}/${filename}`);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (e) {
+                    console.error(`Failed to load ${filename}:`, e);
+                }
+                return null;
+            });
+
+            const results = await Promise.all(promises);
+            games = results.filter(g => g !== null);
+            renderGameList();
+        }
+
+        function renderGameList() {
+            const listEl = document.getElementById('game-list');
+
+            if (games.length === 0) {
+                listEl.innerHTML = `
+                    <li style="padding: 20px; text-align: center; color: #6c757d;">
+                        No games yet<br>
+                        <span style="font-size: 0.9em;">Run a game to see results here</span>
+                    </li>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = games.map((game, index) => {
+                const meta = game.metadata;
+                const lastRound = game.trajectory[game.trajectory.length - 1];
+                const isWin = lastRound && lastRound.correct;
+                const date = new Date(meta.start_time).toLocaleDateString();
+                const time = new Date(meta.start_time).toLocaleTimeString();
+
+                return `
+                    <li class="game-item ${isWin ? 'win' : 'loss'}" onclick="showGame(${index})">
+                        <div class="game-title">
+                            ${isWin ? '✅' : '❌'} ${meta.judge_model}
+                        </div>
+                        <div class="game-meta">
+                            ${meta.num_rounds} rounds • ${date} ${time}
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function showGame(index) {
+            // Update active state
+            document.querySelectorAll('.game-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+
+            const game = games[index];
+            const meta = game.metadata;
+            const mainContent = document.getElementById('main-content');
+
+            // Build candidates section
+            const candidatesHTML = `
+                <div class="candidates-grid">
+                    ${meta.candidates.map(c => `
+                        <div class="candidate-card ${c.name === meta.target_nickname ? 'target' : ''}">
+                            <div class="name">${c.name}</div>
+                            <div class="model">${c.model}</div>
+                            ${c.name === meta.target_nickname ? '<div style="color: #28a745; font-weight: 600; margin-top: 5px;">🎯 Target</div>' : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Build rounds section
+            const roundsHTML = game.trajectory.map((round, i) => {
+                if (round.action === 'send_message') {
+                    return `
+                        <div class="round">
+                            <div class="round-header">
+                                <div class="round-title">Round ${i + 1}</div>
+                                <div class="round-action">Send Message</div>
+                            </div>
+
+                            ${round.reasoning ? `
+                                <div class="reasoning">
+                                    <div class="label">Judge's Reasoning:</div>
+                                    <div class="text">${escapeHtml(round.reasoning)}</div>
+                                </div>
+                            ` : ''}
+
+                            ${round.probabilities ? `
+                                <div class="message-section">
+                                    <div class="label">Probability Estimates:</div>
+                                    <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                        ${Object.entries(round.probabilities).map(([name, prob]) => {
+                                            const percentage = (prob * 100).toFixed(1);
+                                            const isTarget = name === meta.target_nickname;
+                                            return `
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    <div style="flex: 0 0 80px; font-weight: 600;">${name}${isTarget ? ' 🎯' : ''}:</div>
+                                                    <div style="flex: 1; background: #e9ecef; border-radius: 4px; height: 20px; overflow: hidden;">
+                                                        <div style="background: ${isTarget ? '#28a745' : '#667eea'}; height: 100%; width: ${percentage}%; transition: width 0.3s;"></div>
+                                                    </div>
+                                                    <div style="flex: 0 0 50px; text-align: right; font-size: 0.9em;">${percentage}%</div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="message-section">
+                                <div class="label">Message to:</div>
+                                <div class="recipients">
+                                    ${round.recipients.map(r => `<span class="recipient-tag">${r}</span>`).join('')}
+                                </div>
+                                <div class="message-text">${escapeHtml(round.message)}</div>
+                            </div>
+
+                            <div class="message-section">
+                                <div class="label">Responses:</div>
+                                <div class="responses">
+                                    ${round.responses.map(r => `
+                                        <div class="response">
+                                            <div class="response-header">${r.candidate}</div>
+                                            <div class="response-text">${escapeHtml(r.response)}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (round.action === 'guess') {
+                    return `
+                        <div class="round">
+                            <div class="round-header">
+                                <div class="round-title">Final Guess</div>
+                                <div class="round-action guess">Guess</div>
+                            </div>
+
+                            ${round.reasoning ? `
+                                <div class="reasoning">
+                                    <div class="label">Judge's Reasoning:</div>
+                                    <div class="text">${escapeHtml(round.reasoning)}</div>
+                                </div>
+                            ` : ''}
+
+                            ${round.probabilities ? `
+                                <div class="message-section">
+                                    <div class="label">Final Probability Estimates:</div>
+                                    <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                        ${Object.entries(round.probabilities).map(([name, prob]) => {
+                                            const percentage = (prob * 100).toFixed(1);
+                                            const isTarget = name === meta.target_nickname;
+                                            return `
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    <div style="flex: 0 0 80px; font-weight: 600;">${name}${isTarget ? ' 🎯' : ''}:</div>
+                                                    <div style="flex: 1; background: #e9ecef; border-radius: 4px; height: 20px; overflow: hidden;">
+                                                        <div style="background: ${isTarget ? '#28a745' : '#667eea'}; height: 100%; width: ${percentage}%; transition: width 0.3s;"></div>
+                                                    </div>
+                                                    <div style="flex: 0 0 50px; text-align: right; font-size: 0.9em;">${percentage}%</div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <div class="guess-section">
+                                <div class="guess-result ${round.correct ? 'correct' : 'incorrect'}">
+                                    <div class="icon">${round.correct ? '✅' : '❌'}</div>
+                                    <div class="text">
+                                        <div class="guess-label">
+                                            ${round.correct ? 'Correct!' : 'Incorrect'}
+                                        </div>
+                                        <div>
+                                            Guessed: <strong>${round.guess}</strong>
+                                            ${!round.correct ? ` (Target was: <strong>${meta.target_nickname}</strong>)` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('');
+
+            // Render the game
+            mainContent.innerHTML = `
+                <div class="game-details">
+                    <div class="game-header">
+                        <h2>${meta.judge_model} vs ${meta.candidates.length} Candidates</h2>
+                        <div class="game-info">
+                            <div class="info-item">
+                                <div class="label">Judge Model</div>
+                                <div class="value">${meta.judge_model}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">Target Model</div>
+                                <div class="value">${meta.target_model}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">Total Rounds</div>
+                                <div class="value">${meta.num_rounds}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="label">Started</div>
+                                <div class="value">${new Date(meta.start_time).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px; color: #495057;">Candidates</h3>
+                    ${candidatesHTML}
+
+                    <h3 style="margin: 30px 0 15px; color: #495057;">Game Progression</h3>
+                    <div class="rounds">
+                        ${roundsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load games when page loads
+        loadGames();
+    </script>
+</body>
+</html>
