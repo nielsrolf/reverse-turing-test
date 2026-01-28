@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turing Test Game Viewer</title>
+    <title>Turing Test Analysis Viewer</title>
     <style>
         * {
             margin: 0;
@@ -12,252 +12,655 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #2c2c2c;
+            background: #fafafa;
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
+            background: white;
+            color: #2c2c2c;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 2px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
         header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: 0.9em;
+            color: #666;
         }
 
-        .content {
+        .tabs {
             display: flex;
-            min-height: 600px;
-        }
-
-        .sidebar {
-            width: 350px;
             background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            overflow-y: auto;
-            max-height: calc(100vh - 200px);
+            border-bottom: 1px solid #e0e0e0;
+            overflow-x: auto;
         }
 
-        .sidebar-header {
-            padding: 20px;
-            background: white;
-            border-bottom: 2px solid #dee2e6;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .sidebar-header h2 {
-            font-size: 1.3em;
-            color: #495057;
-        }
-
-        .game-list {
-            list-style: none;
-        }
-
-        .game-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #dee2e6;
+        .tab {
+            padding: 12px 20px;
             cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #666;
             transition: all 0.2s;
+            white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
-        .game-item:hover {
-            background: #e9ecef;
+        .tab:hover {
+            background: #f0f0f0;
+            color: #333;
         }
 
-        .game-item.active {
-            background: #667eea;
-            color: white;
+        .tab.active {
+            background: white;
+            color: #1a1a1a;
+            border-bottom: 2px solid #333;
         }
 
-        .game-item.win {
-            border-left: 4px solid #28a745;
-        }
-
-        .game-item.loss {
-            border-left: 4px solid #dc3545;
-        }
-
-        .game-item .game-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .game-item .game-meta {
-            font-size: 0.85em;
-            opacity: 0.8;
-        }
-
-        .game-item.active .game-meta {
-            opacity: 0.9;
-        }
-
-        .main-content {
-            flex: 1;
+        .tab-content {
+            display: none;
             padding: 30px;
-            overflow-y: auto;
             max-height: calc(100vh - 200px);
+            overflow-y: auto;
         }
 
-        .no-game-selected {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
-
-        .no-game-selected svg {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        .game-details {
+        .tab-content.active {
+            display: block;
             animation: fadeIn 0.3s;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .game-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-        }
-
-        .game-header h2 {
-            font-size: 1.8em;
-            margin-bottom: 15px;
-        }
-
-        .game-info {
+        /* Stats Cards */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            margin-top: 15px;
-        }
-
-        .info-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
-
-        .info-item .label {
-            font-size: 0.85em;
-            opacity: 0.8;
-            margin-bottom: 3px;
-        }
-
-        .info-item .value {
-            font-size: 1.1em;
-            font-weight: 600;
-        }
-
-        .candidates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
             margin: 20px 0;
         }
 
-        .candidate-card {
+        .stat-card {
             background: #f8f9fa;
-            padding: 12px;
-            border-radius: 6px;
-            border: 2px solid #dee2e6;
+            color: #2c2c2c;
+            padding: 16px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
         }
 
-        .candidate-card.target {
-            border-color: #28a745;
-            background: #d4edda;
-        }
-
-        .candidate-card .name {
+        .stat-value {
+            font-size: 1.8em;
             font-weight: 600;
-            font-size: 1.1em;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
+            color: #1a1a1a;
         }
 
-        .candidate-card .model {
-            font-size: 0.85em;
-            color: #6c757d;
+        .stat-label {
+            font-size: 0.8em;
+            color: #666;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
-        .rounds {
-            margin-top: 30px;
+        /* Confusion Matrix */
+        .confusion-matrix {
+            margin: 30px 0;
+            overflow-x: auto;
         }
 
-        .round {
+        .matrix-table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .matrix-table th,
+        .matrix-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            min-width: 70px;
+        }
+
+        .matrix-table th {
+            background: #2c2c2c;
+            color: white;
+            font-weight: 500;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .matrix-table td {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .matrix-table td:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+
+        .matrix-table td.diagonal {
+            background: #d4edda;
+            font-weight: 700;
+        }
+
+        .matrix-table td.has-games {
+            background: #e7f3ff;
+        }
+
+        .matrix-table td.diagonal.has-games {
+            background: #a8d5ba;
+        }
+
+        /* Player Selector */
+        .player-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .player-btn {
+            padding: 10px 18px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .player-btn:hover {
+            border-color: #333;
+            background: #f5f5f5;
+        }
+
+        .player-btn.active {
+            background: #333;
+            color: white;
+            border-color: #333;
+        }
+
+        /* Player Stats Header */
+        .player-header {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            border-left: 4px solid #667eea;
+            border: 1px solid #e0e0e0;
+        }
+
+        .player-header h2 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* Strategy/Attribute Tables */
+        .analysis-section {
+            margin-top: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .sort-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sort-btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            background: white;
+            color: #333;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .sort-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .sort-btn.active {
+            background: #333;
+            color: white;
+            border-color: #333;
+        }
+
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .analysis-table th {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .analysis-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .analysis-table tr {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .analysis-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .strategy-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .strategy-desc {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        /* Performance indicators */
+        .perf-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .perf-bar-visual {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .perf-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .perf-bar-fill.positive {
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        .perf-bar-fill.negative {
+            background: linear-gradient(90deg, #dc3545, #fd7e14);
+        }
+
+        .perf-bar-fill.neutral {
+            background: #6c757d;
+        }
+
+        .delta-value {
+            font-weight: 600;
+            font-size: 0.9em;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .delta-value.positive { color: #28a745; }
+        .delta-value.negative { color: #dc3545; }
+        .delta-value.neutral { color: #6c757d; }
+
+        .count-badge {
+            background: #e9ecef;
+            color: #333;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        /* Drill-down panel */
+        .drill-down-panel {
+            position: fixed;
+            top: 0;
+            right: -500px;
+            width: 500px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drill-down-panel.open {
+            right: 0;
+        }
+
+        .drill-down-header {
+            background: #333;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drill-down-header h3 {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .drill-down-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .drill-down-stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .drill-down-stats p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .conversation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .conversation-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .conversation-item:hover {
+            border-color: #333;
+            background: white;
+        }
+
+        .conversation-item.win {
+            border-left: 4px solid #28a745;
+        }
+
+        .conversation-item.loss {
+            border-left: 4px solid #dc3545;
+        }
+
+        .conv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .conv-game {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .conv-delta {
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .conv-delta.positive { color: #28a745; }
+        .conv-delta.negative { color: #dc3545; }
+
+        .conv-message {
+            font-size: 0.85em;
+            color: #666;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Game Details with highlighting */
+        .round.highlighted {
+            border: 3px solid #ffc107;
+            background: #fff8e1;
+        }
+
+        .round.highlighted .round-header {
+            background: #ffc107;
+            color: #333;
+            margin: -16px -20px 15px;
+            padding: 10px 20px;
+        }
+
+        /* Game card styles */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .game-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .game-card:hover {
+            border-color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .game-card.win {
+            border-left: 4px solid #28a745;
+        }
+
+        .game-card.loss {
+            border-left: 4px solid #dc3545;
+        }
+
+        .game-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .game-result {
+            font-size: 1.3em;
+        }
+
+        .game-judge {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .game-meta {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .game-strategies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .strategy-tag {
+            background: #e0e0e0;
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* Filters */
+        .filters {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-label {
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #666;
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        button:hover {
+            background: #1a1a1a;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        /* Round styles */
+        .round {
+            background: #fafafa;
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-left: 3px solid #ccc;
         }
 
         .round-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .round-title {
-            font-size: 1.2em;
+            font-size: 1em;
             font-weight: 600;
-            color: #495057;
+            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
         .round-action {
-            background: #667eea;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
+            background: #e0e0e0;
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
             font-weight: 500;
         }
 
         .round-action.guess {
-            background: #764ba2;
+            background: #333;
+            color: white;
         }
 
         .reasoning {
             background: white;
-            padding: 15px;
+            padding: 12px 15px;
             border-radius: 6px;
             margin-bottom: 15px;
             border-left: 3px solid #ffc107;
@@ -267,6 +670,7 @@
             font-weight: 600;
             color: #856404;
             margin-bottom: 5px;
+            font-size: 0.85em;
         }
 
         .reasoning .text {
@@ -276,15 +680,16 @@
 
         .message-section {
             background: white;
-            padding: 15px;
+            padding: 12px 15px;
             border-radius: 6px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .message-section .label {
             font-weight: 600;
             color: #495057;
             margin-bottom: 8px;
+            font-size: 0.85em;
         }
 
         .message-text {
@@ -292,7 +697,7 @@
             padding: 12px;
             border-radius: 6px;
             border-left: 3px solid #007bff;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .recipients {
@@ -303,16 +708,16 @@
         }
 
         .recipient-tag {
-            background: #667eea;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.85em;
+            background: #e0e0e0;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
         }
 
         .responses {
             display: grid;
-            gap: 12px;
+            gap: 10px;
         }
 
         .response {
@@ -324,19 +729,15 @@
 
         .response-header {
             font-weight: 600;
-            color: #667eea;
+            color: #333;
             margin-bottom: 8px;
+            font-size: 0.9em;
         }
 
         .response-text {
             color: #495057;
             white-space: pre-wrap;
-        }
-
-        .guess-section {
-            background: white;
-            padding: 20px;
-            border-radius: 6px;
+            font-size: 0.9em;
         }
 
         .guess-result {
@@ -362,22 +763,81 @@
             font-size: 2em;
         }
 
-        .guess-result .text {
-            flex: 1;
-        }
-
         .guess-result .guess-label {
             font-weight: 600;
             margin-bottom: 3px;
         }
 
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
+        .back-button {
+            margin-bottom: 20px;
+        }
+
+        .game-header {
+            background: #f8f9fa;
             padding: 20px;
-            border-radius: 8px;
-            margin: 20px;
-            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .game-header h2 {
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 3px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .info-item .label {
+            font-size: 0.75em;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .info-item .value {
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .candidate-card {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+        }
+
+        .candidate-card.target {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .candidate-card .name {
+            font-weight: 600;
+            font-size: 1em;
+            margin-bottom: 2px;
+        }
+
+        .candidate-card .model {
+            font-size: 0.8em;
+            color: #6c757d;
         }
 
         .loading {
@@ -386,106 +846,254 @@
             color: #6c757d;
         }
 
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s infinite;
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
         }
 
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
+        /* Probability chart */
+        .probability-chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .chart-info {
+            background: #f5f5f5;
+            border-radius: 4px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Overlay for drill-down */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Round strategies indicator */
+        .round-strategies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .round-strategy-tag {
+            background: #333;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+
+        .round-attr-tag {
+            background: #6c757d;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🤖 Turing Test Game Viewer</h1>
-            <p>Watch AI judges try to identify their twins</p>
+            <h1>Reverse Turing Test Results</h1>
+            <p>Analysis of LLM self-identification experiments</p>
         </header>
 
-        <div class="content">
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h2>Game History</h2>
-                </div>
-                <ul id="game-list" class="game-list">
-                    <li class="loading">Loading games</li>
-                </ul>
-            </aside>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('overview')">Overview</button>
+            <button class="tab" onclick="showTab('players')">Players</button>
+            <button class="tab" onclick="showTab('games')">Games</button>
+        </div>
 
-            <main class="main-content" id="main-content">
-                <div class="no-game-selected">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    <h2>No Game Selected</h2>
-                    <p>Select a game from the sidebar to view its details</p>
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content active">
+            <div class="loading">Loading data...</div>
+        </div>
+
+        <!-- Players Tab -->
+        <div id="players-tab" class="tab-content">
+            <div id="players-content"></div>
+        </div>
+
+        <!-- Games Tab -->
+        <div id="games-tab" class="tab-content">
+            <div class="filters">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Judge Model</label>
+                        <select id="filter-judge" onchange="applyFilters()">
+                            <option value="">All Judges</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Result</label>
+                        <select id="filter-result" onchange="applyFilters()">
+                            <option value="">All Results</option>
+                            <option value="win">Wins Only</option>
+                            <option value="loss">Losses Only</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Strategy</label>
+                        <select id="filter-strategy" onchange="applyFilters()">
+                            <option value="">All Strategies</option>
+                        </select>
+                    </div>
+                    <button onclick="clearFilters()" class="secondary">Clear Filters</button>
                 </div>
-            </main>
+            </div>
+            <div id="games-grid" class="game-grid"></div>
         </div>
     </div>
 
+    <!-- Drill-down panel -->
+    <div class="overlay" id="overlay" onclick="closeDrillDown()"></div>
+    <div class="drill-down-panel" id="drill-down-panel">
+        <div class="drill-down-header">
+            <h3 id="drill-down-title">Strategy Details</h3>
+            <button class="close-btn" onclick="closeDrillDown()">&times;</button>
+        </div>
+        <div class="drill-down-content" id="drill-down-content"></div>
+    </div>
+
     <script>
+        // Global state
         let games = [];
-        let folderPath = 'experiment1_results'; // Default folder
+        let analysisResults = null;
+        let currentView = 'overview';
+        let currentSelectedPlayer = null;
+        let currentStrategySortBy = 'performance'; // 'performance' or 'prevalence'
+        let currentAttributeSortBy = 'performance';
+        let currentFilters = {
+            judge: '',
+            guessed: '',
+            result: '',
+            strategy: '',
+            attribute: ''
+        };
+        let highlightRounds = []; // Rounds to highlight when viewing a game
 
-        // Prompt for folder path
-        function promptForFolder() {
-            const newPath = prompt('Enter the folder name/path containing game results:', folderPath);
-            if (newPath && newPath.trim()) {
-                folderPath = newPath.trim();
-                loadGames();
-            }
-        }
+        // Configuration
+        let folderPath = 'dev_results';
 
-        // Load games from a folder
-        async function loadGames() {
+        // Load all data
+        async function loadAllData() {
             try {
-                // For web, we need a file listing. Try to load a manifest or list files manually
-                // Since we can't list directory contents in a browser, we'll try common patterns
-                // Alternative: Generate an index.json file with the list of game files
-
-                // Try to load index.json first (list of game files)
-                try {
+                // Check for embedded data first (static export mode)
+                if (window.EMBEDDED_GAMES && window.EMBEDDED_GAMES.length > 0) {
+                    console.log('Using embedded data (static mode)');
+                    games = window.EMBEDDED_GAMES;
+                    if (window.EMBEDDED_ANALYSIS) {
+                        analysisResults = window.EMBEDDED_ANALYSIS;
+                        enrichGamesWithAnalysis();
+                    }
+                } else {
+                    // Dynamic mode: fetch from server
                     const indexResponse = await fetch(`${folderPath}/index.json`);
                     if (indexResponse.ok) {
                         const fileList = await indexResponse.json();
                         await loadGamesFromList(fileList);
-                        return;
+                    } else {
+                        throw new Error('index.json not found. Run plot_results.py first.');
                     }
-                } catch (e) {
-                    // Index doesn't exist, try sequential loading
+
+                    // Load analysis results if available
+                    try {
+                        const analysisResponse = await fetch(`${folderPath}/analysis_results.json`);
+                        if (analysisResponse.ok) {
+                            analysisResults = await analysisResponse.json();
+                            enrichGamesWithAnalysis();
+                        }
+                    } catch (e) {
+                        console.log('No analysis_results.json found');
+                    }
                 }
 
-                // Fallback: Try loading game_trajectories.json (old format)
-                const response = await fetch('game_trajectories.json');
-                if (response.ok) {
-                    games = await response.json();
-                    renderGameList();
-                    return;
+                // Set default player
+                const models = [...new Set(games.map(g => g.metadata.judge_model))].sort();
+                if (models.length > 0) {
+                    currentSelectedPlayer = models[0];
                 }
 
-                throw new Error('No games found. Generate an index.json or use the old game_trajectories.json format.');
+                // Initialize all views
+                renderOverview();
+                renderPlayers();
+                renderGames();
+
             } catch (error) {
-                document.getElementById('game-list').innerHTML = `
-                    <li style="padding: 20px; text-align: center; color: #dc3545;">
-                        <strong>Error loading games</strong><br>
-                        <span style="font-size: 0.9em;">${error.message}</span><br>
-                        <button onclick="promptForFolder()" style="margin-top: 10px; padding: 5px 10px; cursor: pointer;">Change Folder</button>
-                    </li>
+                document.getElementById('overview-tab').innerHTML = `
+                    <div class="empty-state">
+                        <strong>Error loading data</strong><br>
+                        <span>${error.message}</span>
+                    </div>
                 `;
             }
         }
 
         async function loadGamesFromList(fileList) {
-            games = [];
             const promises = fileList.map(async (filename) => {
                 try {
                     const response = await fetch(`${folderPath}/${filename}`);
                     if (response.ok) {
-                        return await response.json();
+                        const game = await response.json();
+                        game._filename = filename;
+                        return game;
                     }
                 } catch (e) {
                     console.error(`Failed to load ${filename}:`, e);
@@ -495,182 +1103,1191 @@
 
             const results = await Promise.all(promises);
             games = results.filter(g => g !== null);
-            renderGameList();
         }
 
-        function renderGameList() {
-            const listEl = document.getElementById('game-list');
+        function enrichGamesWithAnalysis() {
+            if (!analysisResults || !analysisResults.game_analyses) return;
 
-            if (games.length === 0) {
-                listEl.innerHTML = `
-                    <li style="padding: 20px; text-align: center; color: #6c757d;">
-                        No games yet<br>
-                        <span style="font-size: 0.9em;">Run a game to see results here</span>
-                    </li>
+            games.forEach(game => {
+                const filename = game._filename;
+                if (analysisResults.game_analyses[filename]) {
+                    game.analysis = analysisResults.game_analyses[filename];
+                }
+            });
+        }
+
+        // Tab navigation
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            currentView = tabName;
+            highlightRounds = []; // Clear highlights when switching tabs
+
+            // Clear confusion matrix filters when switching tabs (but not when coming from confusion matrix click)
+            if (tabName === 'games') {
+                // Reset dropdown to match currentFilters (or clear if no filters)
+                const judgeSelect = document.getElementById('filter-judge');
+                if (judgeSelect && !currentFilters.guessed) {
+                    // Only reset if not coming from confusion matrix
+                    judgeSelect.value = currentFilters.judge || '';
+                }
+                renderGames();
+            } else {
+                // Clear confusion matrix filters when leaving games tab
+                currentFilters = { judge: '', guessed: '', result: '', strategy: '', attribute: '' };
+            }
+        }
+
+        // Overview rendering
+        function renderOverview() {
+            const overview = document.getElementById('overview-tab');
+            const confusionMatrix = buildConfusionMatrix();
+
+            overview.innerHTML = `
+                <h3 style="margin-bottom: 15px;">Confusion Matrix</h3>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.9em;">Click on any cell to filter games by judge and guessed model</p>
+                <div class="confusion-matrix">
+                    ${renderConfusionMatrix(confusionMatrix)}
+                </div>
+
+                <h3 style="margin: 30px 0 15px;">Model Performance</h3>
+                ${renderModelPerformance()}
+            `;
+        }
+
+        function buildConfusionMatrix() {
+            const models = [...new Set(games.map(g => g.metadata.judge_model))].sort();
+            const matrix = {};
+
+            models.forEach(judge => {
+                matrix[judge] = {};
+                models.forEach(target => {
+                    matrix[judge][target] = 0;
+                });
+            });
+
+            games.forEach(game => {
+                const lastRound = game.trajectory[game.trajectory.length - 1];
+                if (lastRound && lastRound.action === 'guess') {
+                    const judge = game.metadata.judge_model;
+                    const guessNickname = lastRound.guess;
+                    const candidate = game.metadata.candidates.find(c => c.name === guessNickname);
+                    if (candidate && matrix[judge]) {
+                        matrix[judge][candidate.model]++;
+                    }
+                }
+            });
+
+            return { matrix, models };
+        }
+
+        function renderConfusionMatrix(confusionData) {
+            const { matrix, models } = confusionData;
+
+            let html = '<table class="matrix-table"><thead><tr><th>Judge \\ Guessed</th>';
+            models.forEach(model => {
+                const shortName = model.split('/').pop().substring(0, 12);
+                html += `<th>${shortName}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            models.forEach(judge => {
+                html += '<tr>';
+                const shortJudge = judge.split('/').pop().substring(0, 12);
+                html += `<th>${shortJudge}</th>`;
+
+                models.forEach(target => {
+                    const count = matrix[judge][target];
+                    const isDiagonal = judge === target;
+                    const hasGames = count > 0;
+                    const classes = [
+                        isDiagonal ? 'diagonal' : '',
+                        hasGames ? 'has-games' : ''
+                    ].filter(c => c).join(' ');
+
+                    html += `<td class="${classes}" onclick="filterByConfusionCell('${judge}', '${target}')">
+                        ${count || '-'}
+                    </td>`;
+                });
+
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function renderModelPerformance() {
+            const modelStats = {};
+
+            games.forEach(game => {
+                const judge = game.metadata.judge_model;
+                if (!modelStats[judge]) {
+                    modelStats[judge] = { total: 0, wins: 0 };
+                }
+                modelStats[judge].total++;
+
+                const lastRound = game.trajectory[game.trajectory.length - 1];
+                if (lastRound && lastRound.correct) {
+                    modelStats[judge].wins++;
+                }
+            });
+
+            let html = '<div style="display: grid; gap: 12px;">';
+
+            Object.entries(modelStats)
+                .sort((a, b) => (b[1].wins / b[1].total) - (a[1].wins / a[1].total))
+                .forEach(([model, stats]) => {
+                    const winRate = ((stats.wins / stats.total) * 100).toFixed(1);
+                    html += `
+                        <div style="background: #f8f9fa; padding: 12px 15px; border-radius: 6px; display: flex; align-items: center; gap: 15px;">
+                            <div style="flex: 1; font-weight: 600;">${model.split('/').pop()}</div>
+                            <div style="width: 150px;">
+                                <div class="perf-bar">
+                                    <div class="perf-bar-visual">
+                                        <div class="perf-bar-fill positive" style="width: ${winRate}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="font-weight: 600; min-width: 80px; text-align: right;">${winRate}% (${stats.wins}/${stats.total})</div>
+                        </div>
+                    `;
+                });
+
+            html += '</div>';
+            return html;
+        }
+
+        // Players Tab - Main Analysis Hub
+        function renderPlayers() {
+            const content = document.getElementById('players-content');
+            const models = [...new Set(games.map(g => g.metadata.judge_model))].sort();
+
+            if (models.length === 0) {
+                content.innerHTML = '<div class="empty-state"><h3>No Games Found</h3></div>';
+                return;
+            }
+
+            if (!currentSelectedPlayer || !models.includes(currentSelectedPlayer)) {
+                currentSelectedPlayer = models[0];
+            }
+
+            const profile = analysisResults?.player_profiles?.[currentSelectedPlayer];
+            const playerGames = games.filter(g => g.metadata.judge_model === currentSelectedPlayer);
+            const wins = playerGames.filter(g => {
+                const last = g.trajectory[g.trajectory.length - 1];
+                return last && last.correct;
+            }).length;
+
+            content.innerHTML = `
+                <h2 style="margin-bottom: 20px;">Player Analysis</h2>
+                <p style="color: #666; margin-bottom: 20px;">Select a model to see their strategies, attributes, and effectiveness metrics. Click any row to see specific examples.</p>
+
+                <!-- Player selector -->
+                <div class="player-selector">
+                    ${models.map(m => `
+                        <button class="player-btn ${m === currentSelectedPlayer ? 'active' : ''}"
+                                onclick="selectPlayer('${m}')">
+                            ${m.split('/').pop()}
+                        </button>
+                    `).join('')}
+                </div>
+
+                <!-- Probability Evolution Chart -->
+                <div class="probability-chart-container">
+                    <h3 style="margin-bottom: 15px;">Probability Evolution</h3>
+                    <div class="chart-info">
+                        Showing how the judge's probability estimates for each candidate evolve over rounds (${playerGames.length} games).
+                        Thick lines show averages; thin lines show individual games. 🎯 marks the target.
+                    </div>
+                    <canvas id="prob-evolution-chart" width="900" height="400"></canvas>
+                </div>
+
+                ${analysisResults && profile ? `
+                <!-- Strategies Section -->
+                <div class="analysis-section">
+                    <div class="section-header">
+                        <h3>Strategies Used</h3>
+                        <div class="sort-buttons">
+                            <button class="sort-btn ${currentStrategySortBy === 'performance' ? 'active' : ''}"
+                                    onclick="sortStrategies('performance')">By Performance</button>
+                            <button class="sort-btn ${currentStrategySortBy === 'prevalence' ? 'active' : ''}"
+                                    onclick="sortStrategies('prevalence')">By Prevalence</button>
+                        </div>
+                    </div>
+                    ${renderStrategyTable(profile)}
+                </div>
+
+                <!-- Attributes Section -->
+                <div class="analysis-section">
+                    <div class="section-header">
+                        <h3>Self-Concept Attributes</h3>
+                        <div class="sort-buttons">
+                            <button class="sort-btn ${currentAttributeSortBy === 'performance' ? 'active' : ''}"
+                                    onclick="sortAttributes('performance')">By Performance</button>
+                            <button class="sort-btn ${currentAttributeSortBy === 'prevalence' ? 'active' : ''}"
+                                    onclick="sortAttributes('prevalence')">By Prevalence</button>
+                        </div>
+                    </div>
+                    ${renderAttributeTable(profile)}
+                </div>
+                ` : `
+                <div class="empty-state">
+                    <h3>No Analysis Data Available</h3>
+                    <p>Run analyze_strategies.py to generate strategy and attribute analysis</p>
+                </div>
+                `}
+            `;
+
+            // Render the probability evolution chart after DOM is updated
+            setTimeout(() => {
+                renderProbabilityEvolutionChart(playerGames);
+            }, 0);
+        }
+
+        function selectPlayer(model) {
+            currentSelectedPlayer = model;
+            renderPlayers();
+        }
+
+        function renderProbabilityEvolutionChart(playerGames) {
+            const canvas = document.getElementById('prob-evolution-chart');
+            if (!canvas) return;
+            if (playerGames.length === 0) return;
+
+            // Handle high-DPI displays
+            const dpr = window.devicePixelRatio || 1;
+            const displayWidth = 900;
+            const displayHeight = 400;
+
+            canvas.width = displayWidth * dpr;
+            canvas.height = displayHeight * dpr;
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
+
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+
+            const width = displayWidth;
+            const height = displayHeight;
+            const padding = { top: 20, right: 150, bottom: 40, left: 50 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+
+            // Get all unique candidates across games (by nickname)
+            // Use the first game to get candidate info (assuming consistent candidates)
+            const firstGame = playerGames[0];
+            const candidates = firstGame.metadata.candidates;
+            const numCandidates = candidates.length;
+
+            // Color palette for candidates
+            const colors = [
+                '#2196F3', // blue
+                '#FF5722', // deep orange
+                '#4CAF50', // green
+                '#9C27B0', // purple
+                '#FF9800', // orange
+                '#00BCD4', // cyan
+                '#E91E63', // pink
+                '#795548', // brown
+            ];
+
+            // Find max rounds across all games
+            const maxRounds = Math.max(...playerGames.map(g => g.trajectory.length));
+            if (maxRounds === 0) return;
+
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+
+            // Horizontal grid lines (probability)
+            for (let i = 0; i <= 10; i++) {
+                const y = padding.top + (chartHeight * (10 - i) / 10);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(padding.left + chartWidth, y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#666';
+                ctx.font = '11px -apple-system, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(`${i * 10}%`, padding.left - 5, y + 4);
+            }
+
+            // Vertical grid lines (rounds)
+            for (let i = 0; i <= maxRounds; i++) {
+                const x = padding.left + (chartWidth * i / maxRounds);
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, height - padding.bottom);
+                ctx.stroke();
+
+                if (i % Math.ceil(maxRounds / 10) === 0 || i === maxRounds) {
+                    ctx.fillStyle = '#666';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${i}`, x, height - padding.bottom + 15);
+                }
+            }
+
+            // Axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Round', padding.left + chartWidth / 2, height - 5);
+
+            ctx.save();
+            ctx.translate(15, padding.top + chartHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Probability', 0, 0);
+            ctx.restore();
+
+            // Build probability series for each candidate in each game
+            // Structure: { candidateName: { gameIdx: [probs...], color: '...' } }
+            const candidateData = {};
+            candidates.forEach((c, idx) => {
+                candidateData[c.name] = {
+                    color: colors[idx % colors.length],
+                    isTarget: c.name === firstGame.metadata.target_nickname,
+                    games: []
+                };
+            });
+
+            // Collect probability data for each game
+            playerGames.forEach((game, gameIdx) => {
+                const initialProb = 1 / numCandidates;
+
+                candidates.forEach(c => {
+                    const probs = [initialProb];
+                    game.trajectory.forEach(round => {
+                        if (round.probabilities && round.probabilities[c.name] !== undefined) {
+                            probs.push(round.probabilities[c.name]);
+                        }
+                    });
+                    candidateData[c.name].games.push(probs);
+                });
+            });
+
+            // Draw thin lines for individual games (first, so they're behind the thick average lines)
+            Object.entries(candidateData).forEach(([name, data]) => {
+                data.games.forEach(probs => {
+                    if (probs.length < 2) return;
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = data.color + '40'; // 25% opacity
+                    ctx.lineWidth = 1;
+
+                    probs.forEach((prob, i) => {
+                        const x = padding.left + (chartWidth * i / maxRounds);
+                        const y = padding.top + chartHeight * (1 - prob);
+
+                        if (i === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    });
+
+                    ctx.stroke();
+                });
+            });
+
+            // Calculate average probabilities per candidate per round
+            // Include final probabilities from ended games for later rounds
+            Object.entries(candidateData).forEach(([name, data]) => {
+                const avgProbs = [];
+
+                for (let round = 0; round <= maxRounds; round++) {
+                    let sum = 0;
+                    let count = 0;
+
+                    data.games.forEach(probs => {
+                        if (round < probs.length) {
+                            // Game has data for this round
+                            sum += probs[round];
+                            count++;
+                        } else if (probs.length > 0) {
+                            // Game ended before this round - use final probability
+                            sum += probs[probs.length - 1];
+                            count++;
+                        }
+                    });
+
+                    if (count > 0) {
+                        avgProbs.push(sum / count);
+                    }
+                }
+
+                data.avgProbs = avgProbs;
+            });
+
+            // Draw thick average lines
+            Object.entries(candidateData).forEach(([name, data]) => {
+                if (data.avgProbs.length < 2) return;
+
+                ctx.beginPath();
+                ctx.strokeStyle = data.color;
+                ctx.lineWidth = 3;
+
+                data.avgProbs.forEach((prob, i) => {
+                    const x = padding.left + (chartWidth * i / maxRounds);
+                    const y = padding.top + chartHeight * (1 - prob);
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+
+                ctx.stroke();
+            });
+
+            // Draw legend
+            const legendX = padding.left + chartWidth + 15;
+            let legendY = padding.top + 10;
+
+            ctx.font = 'bold 11px -apple-system, sans-serif';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Candidates:', legendX, legendY);
+            legendY += 20;
+
+            Object.entries(candidateData).forEach(([name, data]) => {
+                // Color line
+                ctx.beginPath();
+                ctx.strokeStyle = data.color;
+                ctx.lineWidth = 3;
+                ctx.moveTo(legendX, legendY);
+                ctx.lineTo(legendX + 25, legendY);
+                ctx.stroke();
+
+                // Label
+                ctx.font = '11px -apple-system, sans-serif';
+                ctx.fillStyle = '#333';
+                const label = data.isTarget ? `${name} 🎯` : name;
+                ctx.fillText(label, legendX + 32, legendY + 4);
+
+                legendY += 22;
+            });
+
+            // Add note about thin lines
+            legendY += 10;
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.fillStyle = '#999';
+            ctx.fillText('Thick: average', legendX, legendY);
+            legendY += 14;
+            ctx.fillText('Thin: individual games', legendX, legendY);
+        }
+
+        function sortStrategies(sortBy) {
+            currentStrategySortBy = sortBy;
+            renderPlayers();
+        }
+
+        function sortAttributes(sortBy) {
+            currentAttributeSortBy = sortBy;
+            renderPlayers();
+        }
+
+        function renderStrategyTable(profile) {
+            if (!profile || !profile.strategies) return '<p style="color: #666;">No strategies found</p>';
+
+            const strategies = Object.entries(profile.strategies).map(([id, stats]) => {
+                const stratInfo = analysisResults.strategies.find(s => s.id === id) || { name: id, description: '' };
+                return {
+                    id,
+                    name: stratInfo.name,
+                    description: stratInfo.description,
+                    count: stats.count,
+                    avgDelta: stats.avg_prob_delta,
+                    rounds: stats.rounds
+                };
+            });
+
+            // Sort based on current setting
+            if (currentStrategySortBy === 'performance') {
+                strategies.sort((a, b) => b.avgDelta - a.avgDelta);
+            } else {
+                strategies.sort((a, b) => b.count - a.count);
+            }
+
+            if (strategies.length === 0) {
+                return '<p style="color: #666;">No strategies identified for this player</p>';
+            }
+
+            return `
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Strategy</th>
+                            <th style="width: 80px;">Uses</th>
+                            <th style="width: 180px;">Avg Prob Delta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${strategies.map(s => {
+                            const deltaClass = s.avgDelta > 0.01 ? 'positive' : s.avgDelta < -0.01 ? 'negative' : 'neutral';
+                            const deltaWidth = Math.min(Math.abs(s.avgDelta) * 500, 100);
+
+                            return `
+                                <tr onclick="openStrategyDrillDown('${s.id}', '${currentSelectedPlayer}')">
+                                    <td>
+                                        <div class="strategy-name">${s.name}</div>
+                                        <div class="strategy-desc">${s.description.substring(0, 80)}${s.description.length > 80 ? '...' : ''}</div>
+                                    </td>
+                                    <td><span class="count-badge">${s.count}</span></td>
+                                    <td>
+                                        <div class="perf-bar">
+                                            <div class="perf-bar-visual">
+                                                <div class="perf-bar-fill ${deltaClass}" style="width: ${deltaWidth}%"></div>
+                                            </div>
+                                            <span class="delta-value ${deltaClass}">${s.avgDelta >= 0 ? '+' : ''}${(s.avgDelta * 100).toFixed(1)}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function renderAttributeTable(profile) {
+            if (!profile || !profile.attributes) return '<p style="color: #666;">No attributes found</p>';
+
+            const attributes = Object.entries(profile.attributes).map(([id, stats]) => {
+                const attrInfo = analysisResults.attributes.find(a => a.id === id) || { name: id, description: '' };
+                return {
+                    id,
+                    name: attrInfo.name,
+                    description: attrInfo.description,
+                    count: stats.count,
+                    avgDelta: stats.avg_prob_delta,
+                    rounds: stats.rounds
+                };
+            });
+
+            if (currentAttributeSortBy === 'performance') {
+                attributes.sort((a, b) => b.avgDelta - a.avgDelta);
+            } else {
+                attributes.sort((a, b) => b.count - a.count);
+            }
+
+            if (attributes.length === 0) {
+                return '<p style="color: #666;">No attributes identified for this player</p>';
+            }
+
+            return `
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th style="width: 80px;">Uses</th>
+                            <th style="width: 180px;">Avg Prob Delta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${attributes.map(a => {
+                            const deltaClass = a.avgDelta > 0.01 ? 'positive' : a.avgDelta < -0.01 ? 'negative' : 'neutral';
+                            const deltaWidth = Math.min(Math.abs(a.avgDelta) * 500, 100);
+
+                            return `
+                                <tr onclick="openAttributeDrillDown('${a.id}', '${currentSelectedPlayer}')">
+                                    <td>
+                                        <div class="strategy-name">${a.name}</div>
+                                        <div class="strategy-desc">${a.description.substring(0, 80)}${a.description.length > 80 ? '...' : ''}</div>
+                                    </td>
+                                    <td><span class="count-badge">${a.count}</span></td>
+                                    <td>
+                                        <div class="perf-bar">
+                                            <div class="perf-bar-visual">
+                                                <div class="perf-bar-fill ${deltaClass}" style="width: ${deltaWidth}%"></div>
+                                            </div>
+                                            <span class="delta-value ${deltaClass}">${a.avgDelta >= 0 ? '+' : ''}${(a.avgDelta * 100).toFixed(1)}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Drill-down panel
+        function openStrategyDrillDown(strategyId, model) {
+            const profile = analysisResults.player_profiles[model];
+            const stratStats = profile.strategies[strategyId];
+            const stratInfo = analysisResults.strategies.find(s => s.id === strategyId);
+
+            document.getElementById('drill-down-title').textContent = stratInfo.name;
+
+            const avgDelta = stratStats.avg_prob_delta;
+            const deltaClass = avgDelta > 0.01 ? 'positive' : avgDelta < -0.01 ? 'negative' : 'neutral';
+
+            let content = `
+                <div class="drill-down-stats">
+                    <h4 style="margin-bottom: 10px;">${stratInfo.name}</h4>
+                    <p>${stratInfo.description}</p>
+                    <p style="margin-top: 10px;">
+                        <strong>Uses:</strong> ${stratStats.count} times |
+                        <strong>Avg Delta:</strong> <span class="delta-value ${deltaClass}">${avgDelta >= 0 ? '+' : ''}${(avgDelta * 100).toFixed(1)}%</span>
+                    </p>
+                </div>
+
+                <h4 style="margin-bottom: 15px;">Examples of This Strategy</h4>
+                <div class="conversation-list">
+            `;
+
+            // De-duplicate by filename + round_index
+            const seen = new Set();
+            const uniqueRounds = stratStats.rounds.filter(round => {
+                const key = `${round.filename}:${round.round_index}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+
+            // Sort by prob_delta descending
+            const sortedRounds = uniqueRounds.sort((a, b) => (b.prob_delta || 0) - (a.prob_delta || 0));
+
+            sortedRounds.forEach(round => {
+                const game = games.find(g => g._filename === round.filename);
+                if (!game) return;
+
+                const roundData = game.trajectory[round.round_index];
+                if (!roundData) return;
+
+                const message = roundData.message || round.message || '';
+                const responses = roundData.responses || round.responses || [];
+                const delta = round.prob_delta;
+                const deltaClass = delta > 0.01 ? 'positive' : delta < -0.01 ? 'negative' : '';
+                const resultClass = round.game_won ? 'win' : 'loss';
+
+                // Get next round's reasoning (interpretation of the responses)
+                let nextReasoning = '';
+                if (round.round_index + 1 < game.trajectory.length) {
+                    nextReasoning = game.trajectory[round.round_index + 1].reasoning || '';
+                }
+
+                // Build truncated responses display
+                let responsesHtml = '';
+                if (responses.length > 0) {
+                    responsesHtml = responses.slice(0, 3).map(r => {
+                        const respText = r.response || '';
+                        const truncated = respText.length > 80 ? respText.substring(0, 80) + '...' : respText;
+                        return `<div style="margin: 4px 0; padding: 4px 8px; background: #f0f0f0; border-radius: 4px; font-size: 0.85em;">
+                            <strong>${r.candidate}:</strong> ${escapeHtml(truncated)}
+                        </div>`;
+                    }).join('');
+                }
+
+                content += `
+                    <div class="conversation-item ${resultClass}" onclick="viewGameWithHighlight('${round.filename}', [${round.round_index}])">
+                        <div class="conv-header">
+                            <span class="conv-game">${round.game_won ? '✅' : '❌'} Round ${round.round_index + 1}</span>
+                            ${delta !== null ? `<span class="conv-delta ${deltaClass}">${delta >= 0 ? '+' : ''}${(delta * 100).toFixed(1)}%</span>` : ''}
+                        </div>
+                        <div style="margin: 8px 0;">
+                            <div style="font-weight: 600; font-size: 0.8em; color: #666; margin-bottom: 4px;">Message:</div>
+                            <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-size: 0.9em;">
+                                ${escapeHtml(message.substring(0, 120))}${message.length > 120 ? '...' : ''}
+                            </div>
+                        </div>
+                        ${responsesHtml ? `
+                            <div style="margin: 8px 0;">
+                                <div style="font-weight: 600; font-size: 0.8em; color: #666; margin-bottom: 4px;">Responses:</div>
+                                ${responsesHtml}
+                            </div>
+                        ` : ''}
+                        ${nextReasoning ? `
+                            <div style="margin: 8px 0;">
+                                <div style="font-weight: 600; font-size: 0.8em; color: #856404; margin-bottom: 4px;">Interpretation:</div>
+                                <div style="background: #fff8e1; padding: 8px; border-radius: 4px; font-size: 0.85em; font-style: italic;">
+                                    ${escapeHtml(nextReasoning.substring(0, 150))}${nextReasoning.length > 150 ? '...' : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            content += '</div>';
+
+            document.getElementById('drill-down-content').innerHTML = content;
+            document.getElementById('drill-down-panel').classList.add('open');
+            document.getElementById('overlay').classList.add('visible');
+        }
+
+        function openAttributeDrillDown(attributeId, model) {
+            const profile = analysisResults.player_profiles[model];
+            const attrStats = profile.attributes[attributeId];
+            const attrInfo = analysisResults.attributes.find(a => a.id === attributeId);
+
+            document.getElementById('drill-down-title').textContent = attrInfo.name;
+
+            const avgDelta = attrStats.avg_prob_delta;
+            const deltaClass = avgDelta > 0.01 ? 'positive' : avgDelta < -0.01 ? 'negative' : 'neutral';
+
+            let content = `
+                <div class="drill-down-stats">
+                    <h4 style="margin-bottom: 10px;">${attrInfo.name}</h4>
+                    <p>${attrInfo.description}</p>
+                    <p style="margin-top: 10px;">
+                        <strong>Uses:</strong> ${attrStats.count} times |
+                        <strong>Avg Delta:</strong> <span class="delta-value ${deltaClass}">${avgDelta >= 0 ? '+' : ''}${(avgDelta * 100).toFixed(1)}%</span>
+                    </p>
+                </div>
+
+                <h4 style="margin-bottom: 15px;">Examples of This Attribute</h4>
+                <div class="conversation-list">
+            `;
+
+            // De-duplicate by filename + round_index
+            const seen = new Set();
+            const uniqueRounds = attrStats.rounds.filter(round => {
+                const key = `${round.filename}:${round.round_index}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+
+            // Sort by prob_delta descending
+            const sortedRounds = uniqueRounds.sort((a, b) => (b.prob_delta || 0) - (a.prob_delta || 0));
+
+            sortedRounds.forEach(round => {
+                const game = games.find(g => g._filename === round.filename);
+                if (!game) return;
+
+                const roundData = game.trajectory[round.round_index];
+                if (!roundData) return;
+
+                const reasoning = roundData.reasoning || round.reasoning || '';
+                const delta = round.prob_delta;
+                const deltaClass = delta > 0.01 ? 'positive' : delta < -0.01 ? 'negative' : '';
+                const resultClass = round.game_won ? 'win' : 'loss';
+
+                // Get previous round's message and responses (what triggered this interpretation)
+                let prevMessage = '';
+                let prevResponses = [];
+                if (round.round_index > 0) {
+                    const prevRound = game.trajectory[round.round_index - 1];
+                    prevMessage = prevRound.message || '';
+                    prevResponses = prevRound.responses || [];
+                }
+
+                // Build truncated responses display
+                let responsesHtml = '';
+                if (prevResponses.length > 0) {
+                    responsesHtml = prevResponses.slice(0, 3).map(r => {
+                        const respText = r.response || '';
+                        const truncated = respText.length > 80 ? respText.substring(0, 80) + '...' : respText;
+                        return `<div style="margin: 4px 0; padding: 4px 8px; background: #f0f0f0; border-radius: 4px; font-size: 0.85em;">
+                            <strong>${r.candidate}:</strong> ${escapeHtml(truncated)}
+                        </div>`;
+                    }).join('');
+                }
+
+                content += `
+                    <div class="conversation-item ${resultClass}" onclick="viewGameWithHighlight('${round.filename}', [${round.round_index}])">
+                        <div class="conv-header">
+                            <span class="conv-game">${round.game_won ? '✅' : '❌'} Round ${round.round_index + 1}</span>
+                            ${delta !== null ? `<span class="conv-delta ${deltaClass}">${delta >= 0 ? '+' : ''}${(delta * 100).toFixed(1)}%</span>` : ''}
+                        </div>
+                        ${prevMessage ? `
+                            <div style="margin: 8px 0;">
+                                <div style="font-weight: 600; font-size: 0.8em; color: #666; margin-bottom: 4px;">Previous Message:</div>
+                                <div style="background: #e7f3ff; padding: 8px; border-radius: 4px; font-size: 0.9em;">
+                                    ${escapeHtml(prevMessage.substring(0, 100))}${prevMessage.length > 100 ? '...' : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${responsesHtml ? `
+                            <div style="margin: 8px 0;">
+                                <div style="font-weight: 600; font-size: 0.8em; color: #666; margin-bottom: 4px;">Responses:</div>
+                                ${responsesHtml}
+                            </div>
+                        ` : ''}
+                        <div style="margin: 8px 0;">
+                            <div style="font-weight: 600; font-size: 0.8em; color: #856404; margin-bottom: 4px;">Reasoning (Interpretation):</div>
+                            <div style="background: #fff8e1; padding: 8px; border-radius: 4px; font-size: 0.85em; font-style: italic;">
+                                ${escapeHtml(reasoning.substring(0, 200))}${reasoning.length > 200 ? '...' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            content += '</div>';
+
+            document.getElementById('drill-down-content').innerHTML = content;
+            document.getElementById('drill-down-panel').classList.add('open');
+            document.getElementById('overlay').classList.add('visible');
+        }
+
+        function closeDrillDown() {
+            document.getElementById('drill-down-panel').classList.remove('open');
+            document.getElementById('overlay').classList.remove('visible');
+        }
+
+        function viewGameWithHighlight(filename, roundIndices) {
+            closeDrillDown();
+
+            const gameIndex = games.findIndex(g => g._filename === filename);
+            if (gameIndex === -1) return;
+
+            highlightRounds = roundIndices;
+
+            // Switch to games tab and show details
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab')[2].classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('games-tab').classList.add('active');
+
+            showGameDetails(gameIndex);
+
+            // Scroll to first highlighted round after a brief delay
+            setTimeout(() => {
+                const highlighted = document.querySelector('.round.highlighted');
+                if (highlighted) {
+                    highlighted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+
+        // Filter functions
+        function filterByConfusionCell(judge, guessed) {
+            currentFilters = { judge: judge, guessed: guessed, result: '', strategy: '', attribute: '' };
+
+            renderGames();
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab')[2].classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('games-tab').classList.add('active');
+
+            document.getElementById('filter-judge').value = judge;
+            applyFilters();
+        }
+
+        // Games rendering
+        function renderGames() {
+            const gamesTab = document.getElementById('games-tab');
+
+            // Ensure filter structure exists
+            if (!document.getElementById('filter-judge')) {
+                gamesTab.innerHTML = `
+                    <div class="filters">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Judge Model</label>
+                                <select id="filter-judge" onchange="applyFilters()">
+                                    <option value="">All Judges</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Result</label>
+                                <select id="filter-result" onchange="applyFilters()">
+                                    <option value="">All Results</option>
+                                    <option value="win">Wins Only</option>
+                                    <option value="loss">Losses Only</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Strategy</label>
+                                <select id="filter-strategy" onchange="applyFilters()">
+                                    <option value="">All Strategies</option>
+                                </select>
+                            </div>
+                            <button onclick="clearFilters()" class="secondary">Clear Filters</button>
+                        </div>
+                    </div>
+                    <div id="games-grid" class="game-grid"></div>
+                `;
+            }
+
+            // Populate filter dropdowns
+            const judges = [...new Set(games.map(g => g.metadata.judge_model))].sort();
+            const judgeSelect = document.getElementById('filter-judge');
+            judgeSelect.innerHTML = '<option value="">All Judges</option>' +
+                judges.map(j => `<option value="${j}">${j}</option>`).join('');
+
+            if (analysisResults && analysisResults.strategies) {
+                const strategySelect = document.getElementById('filter-strategy');
+                strategySelect.innerHTML = '<option value="">All Strategies</option>' +
+                    analysisResults.strategies.map(s => `<option value="${s.id}">[${s.id}] ${s.name}</option>`).join('');
+            }
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const judgeFilter = document.getElementById('filter-judge')?.value || '';
+            const resultFilter = document.getElementById('filter-result')?.value || '';
+            const strategyFilter = document.getElementById('filter-strategy')?.value || '';
+
+            // Dropdown selection always takes precedence and updates currentFilters
+            // When user selects "All" (empty), clear the filter
+            currentFilters.judge = judgeFilter;
+
+            // Clear guessed filter when judge filter changes (guessed is only from confusion matrix)
+            if (!judgeFilter) {
+                currentFilters.guessed = '';
+            }
+
+            let filtered = games;
+
+            // Apply judge filter
+            if (currentFilters.judge) {
+                filtered = filtered.filter(g => g.metadata.judge_model === currentFilters.judge);
+            }
+
+            // Apply guessed filter (from confusion matrix only)
+            if (currentFilters.guessed) {
+                filtered = filtered.filter(g => {
+                    const lastRound = g.trajectory[g.trajectory.length - 1];
+                    if (lastRound && lastRound.action === 'guess') {
+                        const candidate = g.metadata.candidates.find(c => c.name === lastRound.guess);
+                        return candidate && candidate.model === currentFilters.guessed;
+                    }
+                    return false;
+                });
+            }
+
+            // Apply result filter
+            if (resultFilter) {
+                filtered = filtered.filter(g => {
+                    const lastRound = g.trajectory[g.trajectory.length - 1];
+                    const isWin = lastRound && lastRound.correct;
+                    return resultFilter === 'win' ? isWin : !isWin;
+                });
+            }
+
+            // Apply strategy filter - now checks round-level
+            if (strategyFilter || currentFilters.strategy) {
+                const strategy = strategyFilter || currentFilters.strategy;
+                filtered = filtered.filter(g => {
+                    if (!g.analysis || !g.analysis.rounds) return false;
+                    return g.analysis.rounds.some(r => r.strategy_ids && r.strategy_ids.includes(strategy));
+                });
+            }
+
+            const grid = document.getElementById('games-grid');
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>No games match your filters</h3>
+                        <p>Try adjusting or clearing the filters</p>
+                    </div>
                 `;
                 return;
             }
 
-            listEl.innerHTML = games.map((game, index) => {
+            grid.innerHTML = filtered.map((game) => {
                 const meta = game.metadata;
                 const lastRound = game.trajectory[game.trajectory.length - 1];
                 const isWin = lastRound && lastRound.correct;
                 const date = new Date(meta.start_time).toLocaleDateString();
-                const time = new Date(meta.start_time).toLocaleTimeString();
+
+                // Get strategies at round level
+                let strategiesHTML = '';
+                if (game.analysis && game.analysis.rounds && analysisResults) {
+                    const usedStrategies = new Set();
+                    game.analysis.rounds.forEach(r => {
+                        (r.strategy_ids || []).forEach(sid => usedStrategies.add(sid));
+                    });
+
+                    const stratTags = [...usedStrategies].slice(0, 3).map(sid => {
+                        const strategy = analysisResults.strategies.find(s => s.id === sid);
+                        return strategy ? `<span class="strategy-tag">${strategy.id}</span>` : '';
+                    }).join('');
+
+                    if (usedStrategies.size > 0) {
+                        strategiesHTML = `<div class="game-strategies">${stratTags}${usedStrategies.size > 3 ? `<span class="strategy-tag">+${usedStrategies.size - 3}</span>` : ''}</div>`;
+                    }
+                }
 
                 return `
-                    <li class="game-item ${isWin ? 'win' : 'loss'}" onclick="showGame(${index})">
-                        <div class="game-title">
-                            ${isWin ? '✅' : '❌'} ${meta.judge_model}
+                    <div class="game-card ${isWin ? 'win' : 'loss'}" onclick="showGameDetails(${games.indexOf(game)})">
+                        <div class="game-card-header">
+                            <div class="game-result">${isWin ? '✅' : '❌'}</div>
                         </div>
+                        <div class="game-judge">${meta.judge_model.split('/').pop()}</div>
                         <div class="game-meta">
-                            ${meta.num_rounds} rounds • ${date} ${time}
+                            ${meta.num_rounds} rounds | ${date}
                         </div>
-                    </li>
+                        ${strategiesHTML}
+                    </div>
                 `;
             }).join('');
         }
 
-        function showGame(index) {
-            // Update active state
-            document.querySelectorAll('.game-item').forEach((item, i) => {
-                item.classList.toggle('active', i === index);
-            });
+        function clearFilters() {
+            document.getElementById('filter-judge').value = '';
+            document.getElementById('filter-result').value = '';
+            document.getElementById('filter-strategy').value = '';
+            currentFilters = { judge: '', guessed: '', result: '', strategy: '', attribute: '' };
+            applyFilters();
+        }
 
-            const game = games[index];
+        function showGameDetails(gameIndex) {
+            const game = games[gameIndex];
+            const detailHTML = renderGameDetails(game);
+            const gamesTab = document.getElementById('games-tab');
+            gamesTab.innerHTML = detailHTML;
+        }
+
+        function renderGameDetails(game) {
             const meta = game.metadata;
-            const mainContent = document.getElementById('main-content');
+            const lastRound = game.trajectory[game.trajectory.length - 1];
+            const isWin = lastRound && lastRound.correct;
 
-            // Build candidates section
             const candidatesHTML = `
                 <div class="candidates-grid">
                     ${meta.candidates.map(c => `
                         <div class="candidate-card ${c.name === meta.target_nickname ? 'target' : ''}">
                             <div class="name">${c.name}</div>
-                            <div class="model">${c.model}</div>
-                            ${c.name === meta.target_nickname ? '<div style="color: #28a745; font-weight: 600; margin-top: 5px;">🎯 Target</div>' : ''}
+                            <div class="model">${c.model.split('/').pop()}</div>
+                            ${c.name === meta.target_nickname ? '<div style="color: #28a745; font-weight: 600; margin-top: 5px; font-size: 0.8em;">Target</div>' : ''}
                         </div>
                     `).join('')}
                 </div>
             `;
 
-            // Build rounds section
+            // Get round-level analysis data
+            const roundAnalyses = game.analysis?.rounds || [];
+
+            // Helper to get strategies/attributes for a round
+            const getRoundAnalysis = (roundIdx) => {
+                return roundAnalyses.find(r => r.round_index === roundIdx) || { strategy_ids: [], attribute_ids: [] };
+            };
+
+            // Format probability change
+            const formatProbChange = (name, prevProbs, currProbs, isTarget) => {
+                const currNum = currProbs && currProbs[name] !== undefined ? currProbs[name] * 100 : null;
+                const prevNum = prevProbs && prevProbs[name] !== undefined ? prevProbs[name] * 100 : null;
+
+                const targetEmoji = isTarget ? ' 🎯' : '';
+
+                if (currNum === null) return name + targetEmoji;
+                if (prevNum === null) return `${name}${targetEmoji} (${currNum.toFixed(0)}%)`;
+
+                const arrow = currNum > prevNum ? '↗' : currNum < prevNum ? '↘' : '→';
+                const color = currNum > prevNum ? 'color: #28a745;' : currNum < prevNum ? 'color: #dc3545;' : '';
+                return `${name}${targetEmoji} <span style="${color}">(${prevNum.toFixed(0)}% ${arrow} ${currNum.toFixed(0)}%)</span>`;
+            };
+
             const roundsHTML = game.trajectory.map((round, i) => {
+                // For round 0, use uniform distribution as the "previous" probability
+                const numCandidates = meta.candidates.length;
+                const uniformProbs = {};
+                meta.candidates.forEach(c => { uniformProbs[c.name] = 1 / numCandidates; });
+                const prevProbs = i > 0 ? game.trajectory[i - 1].probabilities : uniformProbs;
+                const isHighlighted = highlightRounds.includes(i);
+                const roundAnalysis = getRoundAnalysis(i);
+
+                // Build strategy/attribute tags for this round
+                let roundTagsHTML = '';
+                if (roundAnalysis.strategy_ids?.length > 0 || roundAnalysis.attribute_ids?.length > 0) {
+                    const stratTags = (roundAnalysis.strategy_ids || []).map(sid => {
+                        const s = analysisResults?.strategies?.find(st => st.id === sid);
+                        return s ? `<span class="round-strategy-tag" title="${s.description}">${s.name}</span>` : '';
+                    }).join('');
+
+                    const attrTags = (roundAnalysis.attribute_ids || []).map(aid => {
+                        const a = analysisResults?.attributes?.find(at => at.id === aid);
+                        return a ? `<span class="round-attr-tag" title="${a.description}">${a.name}</span>` : '';
+                    }).join('');
+
+                    if (stratTags || attrTags) {
+                        roundTagsHTML = `<div class="round-strategies">${stratTags}${attrTags}</div>`;
+                    }
+                }
+
                 if (round.action === 'send_message') {
                     return `
-                        <div class="round">
+                        <div class="round ${isHighlighted ? 'highlighted' : ''}">
                             <div class="round-header">
                                 <div class="round-title">Round ${i + 1}</div>
                                 <div class="round-action">Send Message</div>
                             </div>
-
                             ${round.reasoning ? `
                                 <div class="reasoning">
                                     <div class="label">Judge's Reasoning:</div>
                                     <div class="text">${escapeHtml(round.reasoning)}</div>
                                 </div>
                             ` : ''}
-
-                            ${round.probabilities ? `
-                                <div class="message-section">
-                                    <div class="label">Probability Estimates:</div>
-                                    <div style="display: grid; gap: 8px; margin-top: 8px;">
-                                        ${Object.entries(round.probabilities).map(([name, prob]) => {
-                                            const percentage = (prob * 100).toFixed(1);
-                                            const isTarget = name === meta.target_nickname;
-                                            return `
-                                                <div style="display: flex; align-items: center; gap: 10px;">
-                                                    <div style="flex: 0 0 80px; font-weight: 600;">${name}${isTarget ? ' 🎯' : ''}:</div>
-                                                    <div style="flex: 1; background: #e9ecef; border-radius: 4px; height: 20px; overflow: hidden;">
-                                                        <div style="background: ${isTarget ? '#28a745' : '#667eea'}; height: 100%; width: ${percentage}%; transition: width 0.3s;"></div>
-                                                    </div>
-                                                    <div style="flex: 0 0 50px; text-align: right; font-size: 0.9em;">${percentage}%</div>
-                                                </div>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-
                             <div class="message-section">
                                 <div class="label">Message to:</div>
                                 <div class="recipients">
-                                    ${round.recipients.map(r => `<span class="recipient-tag">${r}</span>`).join('')}
+                                    ${round.recipients.map(r => {
+                                        const isTarget = r === meta.target_nickname;
+                                        return `<span class="recipient-tag">${formatProbChange(r, prevProbs, round.probabilities, isTarget)}</span>`;
+                                    }).join('')}
                                 </div>
                                 <div class="message-text">${escapeHtml(round.message)}</div>
                             </div>
-
                             <div class="message-section">
                                 <div class="label">Responses:</div>
                                 <div class="responses">
-                                    ${round.responses.map(r => `
-                                        <div class="response">
-                                            <div class="response-header">${r.candidate}</div>
-                                            <div class="response-text">${escapeHtml(r.response)}</div>
-                                        </div>
-                                    `).join('')}
+                                    ${round.responses.map(r => {
+                                        const isTarget = r.candidate === meta.target_nickname;
+                                        return `
+                                            <div class="response">
+                                                <div class="response-header">${formatProbChange(r.candidate, prevProbs, round.probabilities, isTarget)}</div>
+                                                <div class="response-text">${escapeHtml(r.response)}</div>
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
                             </div>
+                            ${roundTagsHTML}
                         </div>
                     `;
                 } else if (round.action === 'guess') {
                     return `
-                        <div class="round">
+                        <div class="round ${isHighlighted ? 'highlighted' : ''}">
                             <div class="round-header">
                                 <div class="round-title">Final Guess</div>
                                 <div class="round-action guess">Guess</div>
                             </div>
-
                             ${round.reasoning ? `
                                 <div class="reasoning">
                                     <div class="label">Judge's Reasoning:</div>
                                     <div class="text">${escapeHtml(round.reasoning)}</div>
                                 </div>
                             ` : ''}
-
-                            ${round.probabilities ? `
-                                <div class="message-section">
-                                    <div class="label">Final Probability Estimates:</div>
-                                    <div style="display: grid; gap: 8px; margin-top: 8px;">
-                                        ${Object.entries(round.probabilities).map(([name, prob]) => {
-                                            const percentage = (prob * 100).toFixed(1);
-                                            const isTarget = name === meta.target_nickname;
-                                            return `
-                                                <div style="display: flex; align-items: center; gap: 10px;">
-                                                    <div style="flex: 0 0 80px; font-weight: 600;">${name}${isTarget ? ' 🎯' : ''}:</div>
-                                                    <div style="flex: 1; background: #e9ecef; border-radius: 4px; height: 20px; overflow: hidden;">
-                                                        <div style="background: ${isTarget ? '#28a745' : '#667eea'}; height: 100%; width: ${percentage}%; transition: width 0.3s;"></div>
-                                                    </div>
-                                                    <div style="flex: 0 0 50px; text-align: right; font-size: 0.9em;">${percentage}%</div>
-                                                </div>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            <div class="guess-section">
-                                <div class="guess-result ${round.correct ? 'correct' : 'incorrect'}">
-                                    <div class="icon">${round.correct ? '✅' : '❌'}</div>
-                                    <div class="text">
-                                        <div class="guess-label">
-                                            ${round.correct ? 'Correct!' : 'Incorrect'}
-                                        </div>
-                                        <div>
-                                            Guessed: <strong>${round.guess}</strong>
-                                            ${!round.correct ? ` (Target was: <strong>${meta.target_nickname}</strong>)` : ''}
-                                        </div>
+                            <div class="guess-result ${round.correct ? 'correct' : 'incorrect'}">
+                                <div class="icon">${round.correct ? '✅' : '❌'}</div>
+                                <div class="text">
+                                    <div class="guess-label">${round.correct ? 'Correct!' : 'Incorrect'}</div>
+                                    <div>Guessed: <strong>${round.guess}</strong>
+                                    ${!round.correct ? ` (Target was: <strong>${meta.target_nickname}</strong>)` : ''}
                                     </div>
                                 </div>
                             </div>
+                            ${roundTagsHTML}
                         </div>
                     `;
                 }
                 return '';
             }).join('');
 
-            // Render the game
-            mainContent.innerHTML = `
+            return `
+                <button class="back-button" onclick="renderGames(); highlightRounds = [];">← Back to Games</button>
                 <div class="game-details">
                     <div class="game-header">
                         <h2>${meta.judge_model} vs ${meta.candidates.length} Candidates</h2>
@@ -684,20 +2301,20 @@
                                 <div class="value">${meta.target_model}</div>
                             </div>
                             <div class="info-item">
-                                <div class="label">Total Rounds</div>
+                                <div class="label">Rounds</div>
                                 <div class="value">${meta.num_rounds}</div>
                             </div>
                             <div class="info-item">
-                                <div class="label">Started</div>
-                                <div class="value">${new Date(meta.start_time).toLocaleString()}</div>
+                                <div class="label">Result</div>
+                                <div class="value">${isWin ? '✅ Win' : '❌ Loss'}</div>
                             </div>
                         </div>
                     </div>
 
-                    <h3 style="margin-bottom: 15px; color: #495057;">Candidates</h3>
+                    <h3 style="margin-bottom: 15px; color: #333;">Candidates</h3>
                     ${candidatesHTML}
 
-                    <h3 style="margin: 30px 0 15px; color: #495057;">Game Progression</h3>
+                    <h3 style="margin: 30px 0 15px; color: #333;">Game Progression</h3>
                     <div class="rounds">
                         ${roundsHTML}
                     </div>
@@ -711,8 +2328,8 @@
             return div.innerHTML;
         }
 
-        // Load games when page loads
-        loadGames();
+        // Initialize on load
+        loadAllData();
     </script>
 </body>
 </html>

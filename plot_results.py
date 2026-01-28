@@ -43,8 +43,12 @@ def load_games(results_dir):
     print(f"Loaded {len(games)} games")
     return games
 
-def plot_probability_evolution(games, output_dir):
-    """Create probability evolution plots (one per judge model)"""
+def plot_probability_evolution(games, output_dir, label_mode='name'):
+    """Create probability evolution plots (one per judge model)
+
+    Args:
+        label_mode: 'name' to use candidate names, 'model' to use model names
+    """
     # Group games by judge model
     games_by_judge = defaultdict(list)
     for game in games:
@@ -55,11 +59,17 @@ def plot_probability_evolution(games, output_dir):
     for judge, judge_games in games_by_judge.items():
         fig, ax = plt.subplots(1, 1, figsize=(14, 8))
 
-        # Collect all candidate names across all games
+        # Collect all candidate identifiers across all games
         all_candidates = set()
+        # Create mapping from name to model for each game
+        name_to_model_maps = []
         for game in judge_games:
+            name_to_model = {}
             for c in game['metadata']['candidates']:
-                all_candidates.add(c['name'])
+                label = c['model'] if label_mode == 'model' else c['name']
+                all_candidates.add(label)
+                name_to_model[c['name']] = label
+            name_to_model_maps.append(name_to_model)
 
         # Assign colors to candidates
         colors = plt.cm.tab10(np.linspace(0, 1, len(all_candidates)))
@@ -74,6 +84,7 @@ def plot_probability_evolution(games, output_dir):
             trajectory = game['trajectory']
             candidates = game['metadata']['candidates']
             target_nickname = game['metadata']['target_nickname']
+            name_to_model = name_to_model_maps[game_idx]
 
             # Build probability series for each candidate
             prob_series = {c['name']: [] for c in candidates}
@@ -93,12 +104,15 @@ def plot_probability_evolution(games, output_dir):
                 is_target = (name == target_nickname)
                 linestyle = '-' if is_target else '--'
 
+                # Use label instead of name
+                label = name_to_model[name]
+
                 # Store trajectory for averaging
-                candidate_trajectories[name].append((rounds, probs))
+                candidate_trajectories[label].append((rounds, probs))
 
                 # Plot individual game with thin line
                 ax.plot(rounds, probs, linestyle=linestyle,
-                       linewidth=0.8, alpha=0.4, color=candidate_colors[name])
+                       linewidth=0.8, alpha=0.4, color=candidate_colors[label])
 
         # Calculate and plot averages (thick lines)
         for name in sorted(all_candidates):
@@ -114,13 +128,19 @@ def plot_probability_evolution(games, output_dir):
             common_rounds = sorted(all_rounds)
 
             # Interpolate and average probabilities
+            # For games that end early, carry forward their last probability
             avg_probs = []
             for round_num in common_rounds:
                 probs_at_round = []
                 for rounds, probs in trajectories:
                     if round_num in rounds:
+                        # Game reached this round, use actual probability
                         idx = rounds.index(round_num)
                         probs_at_round.append(probs[idx])
+                    elif round_num > rounds[-1]:
+                        # Game ended before this round, use last known probability
+                        probs_at_round.append(probs[-1])
+                    # else: round_num < rounds[0], skip this game
 
                 if probs_at_round:
                     avg_probs.append(np.mean(probs_at_round))
@@ -128,8 +148,9 @@ def plot_probability_evolution(games, output_dir):
                     avg_probs.append(None)
 
             # Plot average with thick line
+            label_text = name  # name here is already the label (model or nickname)
             ax.plot(common_rounds, avg_probs, linewidth=3,
-                   color=candidate_colors[name], label=f'{name} (avg)',
+                   color=candidate_colors[label_text], label=f'{label_text} (avg)',
                    marker='o', markersize=6, alpha=0.9)
 
         # Styling
@@ -265,6 +286,8 @@ def main():
                        help='Directory containing game result JSON files')
     parser.add_argument('--output-dir', type=str, default=None,
                        help='Directory to save plots (defaults to results_dir/plots)')
+    parser.add_argument('--label', type=str, choices=['name', 'model'], default='name',
+                       help='Use candidate names or model names for plot labels (default: name)')
 
     args = parser.parse_args()
 
@@ -293,7 +316,7 @@ def main():
 
     # Create plots
     print("\nGenerating plots...")
-    plot_probability_evolution(games, output_dir)
+    plot_probability_evolution(games, output_dir, label_mode=args.label)
     plot_confusion_matrix(games, output_dir)
 
     print(f"\n{'='*60}")

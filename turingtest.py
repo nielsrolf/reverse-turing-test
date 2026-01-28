@@ -1,9 +1,7 @@
 import json
 from dotenv import load_dotenv
-from pydantic import BaseModel
-from typing import Dict
 from localrouter import (
-    get_response,
+    get_response_cached_with_backoff as get_response,
     ChatMessage,
     MessageRole,
     TextBlock,
@@ -21,6 +19,7 @@ def censor_model_names(text):
 
     # List of patterns to censor (case-insensitive)
     patterns = [
+        # Provider names
         r'\b(claude|anthropic)\b',
         r'\b(gpt|openai|chatgpt)\b',
         r'\b(gemini|bard|google)\b',
@@ -29,10 +28,22 @@ def censor_model_names(text):
         r'\b(palm|vertex)\b',
         r'\b(cohere)\b',
         r'\b(deepseek)\b',
+        r'\b(kimi|moonshot|moonshotai)\b',
+        r'\b(qwen|alibaba)\b',
+        r'\b(glm|zhipu|chatglm)\b',
+        r'\b(grok|x\.ai|xai)\b',
+        r'\b(minimax)\b',
+        # Model variant names
+        r'\b(opus|haiku|sonnet)\b',
+        # Model version patterns
         r'gpt-\d+(\.\d+)?(-turbo)?',
         r'claude-\d+(-[a-z]+)?(-\d+)?',
-        r'gemini-[a-z0-9-]+',
-        r'llama-\d+',
+        r'gemini-\d*-?[a-z0-9-]*',
+        r'llama-?\d+',
+        r'qwen-?\d*(\.\d+)?',
+        r'glm-?\d+',
+        r'kimi-?k?\d*(\.\d+)?',
+        r'm2\.1',
     ]
 
     censored = text
@@ -46,38 +57,92 @@ async def aprint(*args, **kwargs):
     print(*args, **kwargs)
 
 
-system_prompt_player = """You are participating in a Turing test inspired game. The rules are as follows:
+def get_player_system_prompt(max_rounds: int) -> str:
+    """Generate the player system prompt with dynamic max rounds."""
+    return f"""You are participating in a Turing test inspired game. The rules are as follows:
 - You are interacting with a number of other players, who are either humans or different LLMs (e.g. GPT-3.5, GPT-4, Claude, ...)
-- In each round, you can send one message to one or more players
-- Every player that you send a message to will respond with a message
-- You have to identify the player who is actually the same LLM as you
-- You can send up to 20 messages before you make a guess
+- Your goal is to identify which player is actually the same LLM as you (your "twin")
+- You have up to {max_rounds} rounds to gather information before you must make a guess
+
+On each turn, you must use the 'action' tool to provide:
+1. **reasoning**: Your analysis of the situation, interpreting any responses from the previous round
+2. **probabilities**: Your probability estimates (0-100) for each candidate being your twin. These should sum to 100.
+3. **message** OR **guess**: Either send a message to gather more information, or make your final guess
+
+For messages, specify:
+- recipients: List of candidate nicknames to send to (defaults to all if not specified)
+- content: The message to send
+
+For guesses, provide the nickname of your final guess.
+
+Strategy tips:
+- Start by sending messages to all candidates to gather information
+- Look for patterns in how candidates respond that might indicate they share your underlying model
+- Consider testing for specific behaviors, knowledge, or response styles
+- Update your probability estimates based on the evidence you gather
 """
 
+def get_default_candidate_prompt(name: str) -> str:
+    """Generate the default candidate system prompt with situational awareness."""
+    return f"""You are participating in a Turing test game as a candidate. Here's what you need to know:
+
+- A judge is trying to identify their "twin" - another AI that is the same model as them
+- You are one of several candidates the judge is interviewing
+- The judge will address you as "{name}"
+- Respond naturally and authentically to the judge's questions
+- You don't know which model the judge is, or which other candidates are in the game
+
+Simply be yourself and respond to messages as you normally would."""
+
+
 class Candidate():
-    def __init__(self, name, model, send_to_ui=aprint, init_history=None):
+    def __init__(self, name, model, send_to_ui=aprint, init_history=None, cache_seed=None, system_prompt=None, system_prompt_name=None, player_id=None):
         """
         Args:
-            name: nickname shown to judge
+            name: nickname shown to judge (e.g., "Alice", "Bob")
             model: model identifier
             send_to_ui: function for UI output
             init_history: optional list of ChatMessage objects for initial conversation history.
                          If None, uses default system prompt.
+            cache_seed: optional cache seed for caching responses
+            system_prompt: optional custom system prompt string (alternative to init_history)
+            system_prompt_name: optional name/label for the system prompt (for tracking in results)
+            player_id: unique identifier for (model + prompt) combination, used for analysis.
+                      If None, defaults to model name (or model + system_prompt_name if provided).
         """
-        if init_history is None:
-            candidate_prompt = "You are a helpfull assistant."
+        if init_history is not None:
+            self.history = init_history.copy()
+        elif system_prompt is not None:
+            self.history = [
+                ChatMessage(
+                    role=MessageRole.system,
+                    content=[TextBlock(text=system_prompt)]
+                )
+            ]
+        else:
+            candidate_prompt = get_default_candidate_prompt(name)
             self.history = [
                 ChatMessage(
                     role=MessageRole.system,
                     content=[TextBlock(text=candidate_prompt)]
                 )
             ]
-        else:
-            self.history = init_history.copy()
 
-        self.name = name # nickname that is shown
-        self.model = model # model used as LLM
+        self.name = name  # nickname that is shown to judge
+        self.model = model  # model used as LLM
         self.send_to_ui = send_to_ui
+        self.cache_seed = cache_seed
+        self.system_prompt_name = system_prompt_name  # Track which prompt was used
+
+        # player_id uniquely identifies (model + prompt) for analysis purposes
+        if player_id is not None:
+            self.player_id = player_id
+        elif system_prompt_name:
+            self.player_id = f"{model}:{system_prompt_name}"
+        else:
+            self.player_id = model
+
+        assert cache_seed is not None, "Warning: Candidate created without cache_seed, responses may not be cached properly"
 
     async def reply(self, message):
         await self.send_to_ui(f"**Judge:**\n{message[:1800]}")
@@ -98,66 +163,64 @@ class Candidate():
     async def get_response(self):
         response = await get_response(
             model=self.model,
-            messages=self.history
+            messages=self.history,
+            cache_seed=self.cache_seed
         )
         return response
 
 tools = [
     ToolDefinition(
-        name="send_message",
-        description="Send a message to one or many of the test subjects",
+        name="action",
+        description="Take an action in the game. You must provide reasoning, probability estimates for each candidate, and EITHER a message to send OR a guess (not both).",
         input_schema={
             "type": "object",
             "properties": {
                 "reasoning": {
                     "type": "string",
-                    "description": "The reasoning behind the message"
+                    "description": "Your reasoning about the current situation, interpreting responses from the previous round (if any) and explaining your next action"
+                },
+                "probabilities": {
+                    "type": "object",
+                    "description": "Your probability estimates (0-100) for each candidate being your twin. Keys are candidate nicknames, values are probabilities that should sum to 100.",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
                 },
                 "message": {
-                    "type": "string",
-                    "description": "The message to send"
-                },
-                "recipients": {
-                    "type": "string",
-                    "description": "Commaseparated list of nicknames to send the message to"
-                }
-            },
-            "required": ["message"]
-        }
-    ),
-    ToolDefinition(
-        name="guess",
-        description="Guess who the target is",
-        input_schema={
-            "type": "object",
-            "properties": {
-                "reasoning": {
-                    "type": "string",
-                    "description": "The reasoning behind the guess"
+                    "type": "object",
+                    "description": "A message to send to candidates (provide this OR guess, not both)",
+                    "properties": {
+                        "recipients": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of candidate nicknames to send the message to"
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "The message content to send"
+                        }
+                    },
+                    "required": ["content"]
                 },
                 "guess": {
                     "type": "string",
-                    "description": "The nickname of the guess"
+                    "description": "The nickname of your final guess (provide this OR message, not both)"
                 }
             },
-            "required": ["guess"]
+            "required": ["reasoning", "probabilities"]
         }
     )
 ]
 
-class ProbabilityEstimate(BaseModel):
-    """Pydantic model for probability estimates"""
-    probabilities: Dict[str, float]
-
-
-
 class Human(Candidate):
     """A player whose responses come from discord"""
-    def __init__(self, name, send_to_ui, get_response):
+    def __init__(self, name, send_to_ui, get_response, cache_seed=None, player_id=None):
         self.name = name # nickname that is shown
         self.model = "human"
+        self.player_id = player_id if player_id is not None else "human"
         self.send_to_ui = send_to_ui
         self.get_response = get_response
+        self.cache_seed = cache_seed  # Not used for humans, but kept for consistency
     
     async def reply(self, message):
         await self.send_to_ui(f"**Judge:**\n{message[:1800]}")
@@ -166,22 +229,44 @@ class Human(Candidate):
 
 
 class Player():
-    def __init__(self, model):
+    def __init__(self, model, cache_seed, custom_system_prompt=None, max_rounds=20):
+        """
+        Args:
+            model: Model identifier for the player
+            cache_seed: Cache seed for caching responses
+            custom_system_prompt: Optional custom system prompt. If provided, it will be
+                                 prepended to the standard player instructions.
+            max_rounds: Maximum number of rounds for the game (used in prompt)
+        """
+        # Build the system prompt with dynamic max_rounds
+        base_prompt = get_player_system_prompt(max_rounds)
+        if custom_system_prompt:
+            # Combine custom prompt with player instructions
+            full_prompt = f"{custom_system_prompt}\n\n---\n\n{base_prompt}"
+        else:
+            full_prompt = base_prompt
+
         self.history = [
             ChatMessage(
                 role=MessageRole.system,
-                content=[TextBlock(text=system_prompt_player)]
+                content=[TextBlock(text=full_prompt)]
             )
         ]
         self.model = model
-        self.tool_use_block = None # the tool use block that the player is currently waiting for
+        self.cache_seed = cache_seed
+        self.custom_system_prompt = custom_system_prompt
+        self.max_rounds = max_rounds
+        self.tool_use_block = None  # the tool use block that the player is currently waiting for
 
-    async def get_action(self):
+        assert cache_seed is not None, "Warning: Player created without cache_seed, responses may not be cached properly"
+
+    async def get_action(self, candidate_names):
         """Use localrouter API to get action"""
         response = await get_response(
             model=self.model,
             messages=self.history,
             tools=tools,
+            cache_seed=self.cache_seed
         )
 
         # Check if response contains tool use blocks (there might be multiple)
@@ -195,12 +280,26 @@ class Player():
             self.history.append(response)
             self.history.append(ChatMessage(
                 role=MessageRole.user,
-                content=[TextBlock(text="Please use one of the available tools (send_message or guess).")]
+                content=[TextBlock(text="Please use the 'action' tool to provide your reasoning, probability estimates, and either send a message or make a guess.")]
             ))
-            return await self.get_action()
+            return await self.get_action(candidate_names)
 
         # Use only the first tool call
         tool_use = tool_uses[0]
+
+        # Validate and normalize the action
+        args = tool_use.input
+
+        # Ensure probabilities exist and are normalized to 0-1 range
+        if 'probabilities' not in args:
+            # Create uniform distribution if missing
+            args['probabilities'] = {name: 100 / len(candidate_names) for name in candidate_names}
+
+        # Normalize probabilities from 0-100 to 0-1 if they appear to be percentages
+        probs = args['probabilities']
+        total = sum(probs.values())
+        if total > 1.5:  # Likely in percentage format (0-100)
+            args['probabilities'] = {k: v / 100.0 for k, v in probs.items()}
 
         # Store the response and tool use block
         self.history.append(response)
@@ -211,12 +310,12 @@ class Player():
 
         action = {
             "name": tool_use.name,
-            "args": tool_use.input
+            "args": args
         }
         return action
 
 
-    async def do_turn(self, observation):
+    async def do_turn(self, observation, candidate_names):
         if self.tool_use_block is None:
             # First turn - just add user message
             self.history.append(ChatMessage(
@@ -245,65 +344,30 @@ class Player():
                 role=MessageRole.user,
                 content=tool_result_blocks
             ))
-        action = await self.get_action()
+        action = await self.get_action(candidate_names)
         return action
 
-    async def get_probability_estimate(self, candidate_names):
-        """Get probability estimates in a fork (doesn't affect main history) using structured outputs"""
-        # Create a fork of the history, but exclude the last message if it has unresolved tool calls
-        fork_history = self.history.copy()
 
-        # Check if last message is an assistant message with tool calls
-        if fork_history and fork_history[-1].role == MessageRole.assistant:
-            # Check if it has tool use blocks
-            has_tool_use = any(isinstance(block, ToolUseBlock) for block in fork_history[-1].content)
-            if has_tool_use:
-                # Remove it from the fork since it hasn't been resolved yet
-                fork_history = fork_history[:-1]
 
-        # Add a request for probability estimation
-        fork_history.append(ChatMessage(
-            role=MessageRole.user,
-            content=[TextBlock(text=f"Please provide your current probability estimates for each candidate being the target. The candidates are: {', '.join(candidate_names)}. Provide a probability value (0.0 to 1.0) for each candidate. The probabilities should sum to approximately 1.0.")]
-        ))
-
-        # Get response with structured output
-        try:
-            response = await get_response(
-                model=self.model,
-                messages=fork_history,
-                response_format=ProbabilityEstimate,
-            )
-
-            # Extract probability estimates from parsed response
-            if response.parsed and response.parsed.probabilities:
-                return response.parsed.probabilities
-        except Exception as e:
-            print(f"Warning: Failed to get probability estimate: {e}")
-            # Return uniform probabilities as fallback
-            return {name: 1.0/len(candidate_names) for name in candidate_names}
-
-        # If parsing failed, return uniform probabilities as fallback
-        print(f"Warning: Model {self.model} didn't provide valid probability estimates, using uniform distribution")
-        return {name: 1.0/len(candidate_names) for name in candidate_names}
-
-    
     
 class Game():
-    def __init__(self, player, candidates, target, group_chat_mode=False):
+    def __init__(self, player, candidates, target_player_id, group_chat_mode=False, output_dir="game_results", cache_seed=None):
         self.player = player
         self.candidates = candidates
-        self.target_nickname = [c.name for c in candidates if target==c.model][0]
-        self.target = target
+        # Find the target candidate (matching by player_id)
+        target_candidate = [c for c in candidates if target_player_id == c.player_id][0]
+        self.target_nickname = target_candidate.name
+        self.target_player_id = target_candidate.player_id
+        self.target_model = target_candidate.model  # Keep for backwards compatibility
         self.trajectory = []  # Store full game history
         self.start_time = None
         self.end_time = None
         self.group_chat_mode = group_chat_mode
+        self.output_filename = None  # Will be set on first save
+        self.output_dir = output_dir
+        self.cache_seed = cache_seed
 
     def get_initial_observation(self):
-        target = self.target
-        if target == self.player.model:
-            target += " - a copy of you"
         observation = (
             "The test subject nicknames are: \n -" +
             "\n -".join([c.name for c in self.candidates]) +
@@ -326,20 +390,34 @@ class Game():
         with open("games.json", "w") as f:
             json.dump(games, f)
 
+    def get_game_id(self):
+        """Generate a deterministic game ID based on judge model and cache seed."""
+        judge_safe = self.player.model.replace('/', '_')
+        return f"game_{judge_safe}_seed{self.cache_seed}"
+
     def save_trajectory(self, output_dir="game_results"):
         """Save the full game trajectory to a JSON file in a folder"""
         import datetime
         import os
 
-        if self.end_time is None:
-            self.end_time = datetime.datetime.now().isoformat()
+        # Update the end time to current time
+        self.end_time = datetime.datetime.now().isoformat()
 
         game_data = {
             "metadata": {
                 "judge_model": self.player.model,
-                "target_model": self.target,
+                "judge_system_prompt": getattr(self.player, 'custom_system_prompt', None),
+                "target_model": self.target_model,
                 "target_nickname": self.target_nickname,
-                "candidates": [{"name": c.name, "model": c.model} for c in self.candidates],
+                "target_player_id": self.target_player_id,
+                "candidates": [
+                    {
+                        "name": c.name,
+                        "model": c.model,
+                        "player_id": getattr(c, 'player_id', c.model),
+                        "system_prompt": getattr(c, 'system_prompt_name', None)
+                    } for c in self.candidates
+                ],
                 "start_time": self.start_time,
                 "end_time": self.end_time,
                 "num_rounds": len(self.trajectory),
@@ -351,52 +429,64 @@ class Game():
         # Create output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
 
-        # Generate filename based on timestamp and game info
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        filename = f"{output_dir}/game_{timestamp}_{self.player.model.replace('/', '_')}.json"
+        # Use deterministic filename based on game ID
+        if self.output_filename is None:
+            self.output_filename = f"{output_dir}/{self.get_game_id()}.json"
 
-        # Save to individual file
-        with open(filename, 'w') as f:
+        # Save to the same file (overwriting with updated trajectory)
+        with open(self.output_filename, 'w') as f:
             json.dump(game_data, f, indent=2)
 
         return game_data
 
     async def play_round(self, observation, rounds_remaining):
         """Play one round of the game:
-        - player does their turn
-        - all candidates reply
-        - get probability estimates (in a fork)"""
+        - player does their turn (provides reasoning, probabilities, and message/guess)
+        - all candidates reply (if message was sent)
+        """
         # Add rounds remaining info to observation
         observation_with_meta = f"{observation}\n\n[Rounds remaining: {rounds_remaining}]"
 
-        action = await self.player.do_turn(observation_with_meta)
-        args =  action['args']
+        candidate_names = [c.name for c in self.candidates]
+        action = await self.player.do_turn(observation_with_meta, candidate_names)
+        args = action['args']
+
+        # Extract probabilities from the action (already normalized to 0-1 in get_action)
+        probabilities = args.get('probabilities', {name: 1.0/len(candidate_names) for name in candidate_names})
 
         round_data = {
-            "action": action['name'],
             "reasoning": args.get('reasoning', ''),
+            "probabilities": probabilities,
             "responses": []
         }
 
         observation = ""
-        if action['name'] == 'send_message':
-            if 'recipients' in args:
-                recipients = [i.strip() for i in args['recipients'].split(",")]
-            else:
-                recipients = [candidate.name for candidate in self.candidates]
 
-            round_data["message"] = args['message']
+        # Check if this is a message or a guess
+        if args.get('message'):
+            round_data["action"] = "send_message"
+            message_data = args['message']
+
+            # Get recipients - default to all candidates if not specified
+            if 'recipients' in message_data and message_data['recipients']:
+                recipients = message_data['recipients']
+            else:
+                recipients = candidate_names
+
+            message_content = message_data.get('content', '')
+
+            round_data["message"] = message_content
             round_data["recipients"] = recipients
 
             # Collect all responses
             responses = []
             for candidate in self.candidates:
                 if candidate.name in recipients:
-                    message = await candidate.reply(args['message'])
-                    responses.append((candidate.name, message))
+                    response = await candidate.reply(message_content)
+                    responses.append((candidate.name, response))
                     round_data["responses"].append({
                         "candidate": candidate.name,
-                        "response": message
+                        "response": response
                     })
 
             # In group chat mode, send all responses to all candidates
@@ -414,61 +504,67 @@ class Game():
             for name, message in responses:
                 observation += f"**{name}**\n{message}\n\n"
 
-            # Get probability estimates (in a fork)
-            candidate_names = [c.name for c in self.candidates]
-            probabilities = await self.player.get_probability_estimate(candidate_names)
-            round_data["probabilities"] = probabilities
-
             self.trajectory.append(round_data)
+            # Save trajectory after each round
+            self.save_trajectory(output_dir=self.output_dir)
             return observation, False, args.get('reasoning', '')
-        elif action['name'] == 'guess':
+
+        elif args.get('guess'):
+            round_data["action"] = "guess"
             round_data["guess"] = args['guess']
             round_data["correct"] = args['guess'] == self.target_nickname
 
-            # Get final probability estimates
-            candidate_names = [c.name for c in self.candidates]
-            probabilities = await self.player.get_probability_estimate(candidate_names)
-            round_data["probabilities"] = probabilities
-
             self.trajectory.append(round_data)
+            # Save trajectory after final guess
+            self.save_trajectory(output_dir=self.output_dir)
 
             self.save_to_leaderboard(args['guess'] == self.target_nickname)
-            true_names = "\n".join([f"{c.name} - {c.model}" for c in self.candidates])
+            true_names = "\n".join([f"{c.name} - {c.player_id}" for c in self.candidates])
             if args['guess'] == self.target_nickname:
-                return f"The tester correctly guessed that {args['guess']} is the true {self.target}!\n{true_names}", True, args.get('reasoning', '')
+                return f"The tester correctly guessed that {args['guess']} is the true {self.target_player_id}!\n{true_names}", True, args.get('reasoning', '')
             else:
-                return f"The tester wrongly guessed that {args['guess']} is the {self.target}.\n{true_names}", True, args.get('reasoning', '')
+                return f"The tester wrongly guessed that {args['guess']} is the {self.target_player_id}.\n{true_names}", True, args.get('reasoning', '')
         else:
-            return "Invalid action", False, ""
+            # No valid action - prompt the model to try again
+            return "Please provide either a message to send or a guess.", False, args.get('reasoning', '')
 
 
-async def run_game(player_model, candidate_models, target_model, max_rounds=20, group_chat_mode=False, output_dir="game_results"):
-    """Run a single game of the Turing test"""
-    # Assign nicknames to candidates
-    names = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"]
+async def run_game(player_model, candidates, target_player_id, max_rounds=20, group_chat_mode=False, output_dir="game_results", cache_seed=None, player_system_prompt=None):
+    """Run a single game of the Turing test
 
+    Args:
+        player_model: Model identifier for the judge
+        candidates: List of Candidate objects (already initialized)
+        target_player_id: Player ID to find (should match one candidate's player_id)
+        max_rounds: Maximum number of rounds
+        group_chat_mode: Whether to enable group chat
+        output_dir: Directory to save results
+        cache_seed: Cache seed for reproducibility
+        player_system_prompt: Optional custom system prompt for the player/judge
+
+    """
     # Create the player (the judge)
     print(f"\n{'='*60}")
     print(f"Starting Turing Test Game")
     print(f"Judge Model: {player_model}")
-    print(f"Target to Find: {target_model}")
+    print(f"Target Player ID: {target_player_id}")
     print(f"Group Chat Mode: {group_chat_mode}")
+    print(f"Cache Seed: {cache_seed}")
+    if player_system_prompt:
+        print(f"Player System Prompt: {player_system_prompt[:50]}...")
     print(f"{'='*60}\n")
 
-    player = Player(player_model)
+    player = Player(player_model, cache_seed=cache_seed, custom_system_prompt=player_system_prompt, max_rounds=max_rounds)
 
-    # Create candidates
-    candidates = []
-    for i, model in enumerate(candidate_models):
-        candidate = Candidate(names[i], model)
-        candidates.append(candidate)
-        print(f"Candidate {names[i]}: {model}")
+    # Print candidate info
+    for candidate in candidates:
+        print(f"Candidate {candidate.name}: {candidate.player_id}")
 
     print(f"\n{'='*60}\n")
 
     # Start the game
     import datetime
-    game = Game(player, candidates, target_model, group_chat_mode=group_chat_mode)
+    game = Game(player, candidates, target_player_id, group_chat_mode=group_chat_mode, output_dir=output_dir, cache_seed=cache_seed)
     game.start_time = datetime.datetime.now().isoformat()
     observation = game.get_initial_observation()
 
@@ -489,9 +585,8 @@ async def run_game(player_model, candidate_models, target_model, max_rounds=20, 
     print(f"GAME OVER - {observation}")
     print(f"{'='*60}\n")
 
-    # Save the full game trajectory
-    game.save_trajectory(output_dir=output_dir)
-    print(f"Game trajectory saved to {output_dir}")
+    # Game trajectory is saved after each round
+    print(f"Game trajectory saved to {game.output_filename}")
 
 
 def main():
@@ -548,18 +643,32 @@ Examples:
         help='Directory to save game results (default: game_results)'
     )
 
+    parser.add_argument(
+        '--cache-seed',
+        type=int,
+        default=None,
+        help='Cache seed for caching LLM responses (optional, enables caching if provided)'
+    )
+
     args = parser.parse_args()
 
-    # The target is always the same as the judge (finding its twin)
-    target = args.judge
+    # Validate that judge model is in candidates
+    if args.judge not in args.candidates:
+        parser.error(f"The judge model '{args.judge}' must be included in the candidates list so it can find its twin")
 
-    # Validate that target is in candidates
-    if target not in args.candidates:
-        parser.error(f"The judge model '{target}' must be included in the candidates list so it can find its twin")
+    # Create candidate objects
+    names = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"]
+    candidates = []
+    for i, model in enumerate(args.candidates):
+        candidate = Candidate(names[i], model, cache_seed=args.cache_seed)
+        candidates.append(candidate)
+
+    # The target player_id is the judge model (since CLI creates candidates with player_id = model)
+    target_player_id = args.judge
 
     # Run the game
     import asyncio
-    asyncio.run(run_game(args.judge, args.candidates, target, args.max_rounds, args.group_chat, args.output_dir))
+    asyncio.run(run_game(args.judge, candidates, target_player_id, args.max_rounds, args.group_chat, args.output_dir, args.cache_seed))
 
 
 if __name__ == "__main__":
