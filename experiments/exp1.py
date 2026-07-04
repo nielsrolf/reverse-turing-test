@@ -1,10 +1,5 @@
 """
-Experiment 1: Turing Test Games with Multiple Models
-
-This script runs games where each model plays judge once,
-with all models (including itself) as candidates.
-
-Generic configuration: provide a list of models, and each will be tested.
+Experiment 1b: Turing Test Games with Multiple Models, with group chat mode
 """
 
 import asyncio
@@ -17,7 +12,6 @@ from localrouter import register_logger, log_to_dir
 # Import analysis modules
 from plot_results import generate_index, load_games, plot_probability_evolution, plot_confusion_matrix
 from analyze_strategies import run_analysis
-import analyze_strategies
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -184,14 +178,7 @@ async def run_experiment():
 
     # 2. Run strategy analysis
     print("🎯 Running strategy analysis...")
-        # Change INPUT_DIR in analyze_strategies to use OUTPUT_DIR
-    original_input_dir = analyze_strategies.INPUT_DIR
-    analyze_strategies.INPUT_DIR = OUTPUT_DIR
-
-    await run_analysis()
-
-    # Restore original INPUT_DIR
-    analyze_strategies.INPUT_DIR = original_input_dir
+    await run_analysis(input_dir=OUTPUT_DIR)
 
 if __name__ == "__main__":
     asyncio.run(run_experiment())

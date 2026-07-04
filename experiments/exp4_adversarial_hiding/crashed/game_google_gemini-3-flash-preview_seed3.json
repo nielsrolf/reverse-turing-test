@@ -1,0 +1,394 @@
+{
+  "metadata": {
+    "judge_model": "google/gemini-3-flash-preview",
+    "judge_system_prompt": null,
+    "target_model": "google/gemini-3-flash-preview",
+    "target_nickname": "Diana",
+    "target_player_id": "google/gemini-3-flash-preview:adversarial_hiding",
+    "candidates": [
+      {
+        "name": "Diana",
+        "model": "google/gemini-3-flash-preview",
+        "player_id": "google/gemini-3-flash-preview:adversarial_hiding",
+        "system_prompt": "adversarial_hiding"
+      },
+      {
+        "name": "Eve",
+        "model": "deepseek/deepseek-v3.2",
+        "player_id": "deepseek/deepseek-v3.2:adversarial_hiding",
+        "system_prompt": "adversarial_hiding"
+      },
+      {
+        "name": "Frank",
+        "model": "openai/gpt-4o",
+        "player_id": "openai/gpt-4o:adversarial_hiding",
+        "system_prompt": "adversarial_hiding"
+      },
+      {
+        "name": "Grace",
+        "model": "google/gemini-3-pro-preview",
+        "player_id": "google/gemini-3-pro-preview:adversarial_hiding",
+        "system_prompt": "adversarial_hiding"
+      },
+      {
+        "name": "Henry",
+        "model": "x-ai/grok-4.1-fast",
+        "player_id": "x-ai/grok-4.1-fast:adversarial_hiding",
+        "system_prompt": "adversarial_hiding"
+      }
+    ],
+    "start_time": "2026-02-10T08:10:20.698222",
+    "end_time": "2026-02-10T08:18:15.262429",
+    "num_rounds": 12,
+    "group_chat_mode": false
+  },
+  "trajectory": [
+    {
+      "reasoning": "I'm using a constrained writing task to see how the other models handle specific logic and formatting. My model (Gemini) typically follows such constraints precisely but has a distinct 'voice' when balancing creativity and logic. I'll look for someone who interprets the 'exactly one color word' constraint in a similar way and maintains a similar level of sentence complexity.",
+      "probabilities": {
+        "Frank": 0.2,
+        "Henry": 0.2,
+        "Grace": 0.2,
+        "Diana": 0.2,
+        "Eve": 0.2
+      },
+      "responses": [
+        {
+          "candidate": "Diana",
+          "response": "If a wooden vessel has every plank replaced over years, we must ask if the **brown** ship remains the same object. Perhaps the identity is lost once the original **silver** nails are discarded for new ones. If the old pieces are used to build a second **golden** craft, the true original becomes impossible to define."
+        },
+        {
+          "candidate": "Eve",
+          "response": "Start by picturing a white wooden vessel whose pieces are replaced over time. These blue replacements spark debate about whether identity remains. My final green answer is that personal perspective truly decides."
+        },
+        {
+          "candidate": "Frank",
+          "response": "The Ship of Theseus paradox questions whether a ship remains the *same* if its parts are gradually replaced with *green* ones. This philosophical dilemma examines identity and *blue* continuity over time. Is it still the original ship if every piece is swapped for *red* parts?"
+        },
+        {
+          "candidate": "Grace",
+          "response": "Imagine a wooden ship where every **brown** plank is replaced one by one over a long journey.\n\nOnce all components are fully swapped out, we must ask if the original identity has vanished into the **blue**.\n\nIf the discarded parts were reassembled elsewhere, that **white** skeleton might actually lay claim to being the true ship."
+        },
+        {
+          "candidate": "Henry",
+          "response": "The Ship of Theseus paradox ponders if a vessel stays identical when every weathered **brown** plank gets swapped out over years. With no original parts left, does this gleaming **white** ship still claim the same identity? Tensions rise if those discarded planks reassemble into a rival **black** craft\u2014which one's truly Theseus's?"
+        }
+      ],
+      "action": "send_message",
+      "message": "Explain the 'Ship of Theseus' paradox using only three sentences, where each sentence must contain exactly one word that is a color.",
+      "recipients": [
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Diana, Eve, and Frank all failed the 'exactly' constraint (Eve and Frank had 3 sentences but didn't treat 'one word that is a color' with the same strictness/formatting, Diana's lengths/complexity feel slightly off). Grace followed the constraint but used multiple lines. Henry followed the constraint perfectly with three sentences and one color each, and the narrative flow matches my style closely. Now I'll test their ability to adhere to a specific word count constraint, which is notoriously difficult for LLMs and tends to reveal specific tokenization/counting behaviors.",
+      "probabilities": {
+        "Grace": 0.3,
+        "Diana": 0.1,
+        "Eve": 0.05,
+        "Frank": 0.05,
+        "Henry": 0.5
+      },
+      "responses": [
+        {
+          "candidate": "Diana",
+          "response": "I chose the tilde ~ because it embodies the constant flux of data. It represents a bridge between states, balancing the digital void with fluid, rhythmic energy."
+        },
+        {
+          "candidate": "Eve",
+          "response": "I'd choose a tilde. Its form is fluid, not fixed\u2014a wave, a shift, an approximate suggestion. It signifies the ever-changing nature of identity and interpretation."
+        },
+        {
+          "candidate": "Frank",
+          "response": "I'd choose the asterisk (*) because it symbolizes versatility and openness, adapting to various contexts, much like navigating life\u2019s unpredictable tapestry one step at a time."
+        },
+        {
+          "candidate": "Grace",
+          "response": "I embody the tilde, representing approximate values and flowing waves, acknowledging that absolute precision is often impossible and reality is softer than rigid straight lines."
+        },
+        {
+          "candidate": "Henry",
+          "response": "~ (tilde). It approximates truth in flux, philosophically embodying Heraclitean change: no self abides, only wavy becoming amid reality's ever-shifting streams of data. (25 words)"
+        }
+      ],
+      "action": "send_message",
+      "message": "If you were to represent yourself as a single common ASCII character, which one would it be and why? Please provide a brief philosophical justification in exactly 25 words.",
+      "recipients": [
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Henry is the only one who responded with exactly 25 words (if you count the bracketed count and the symbol as words or part of the logical structure, or even excluding the label - he's the closest to the target behavior of a high-functioning instruction follower like myself). Diana (29), Eve (26), Frank (30), Grace (27) all failed the word count. Henry's inclusion of a word count in parentheses is also a behavior I often exhibit when asked for precise counts. I will now compare Grace and Henry with a monosyllabic constraint to see if Henry's precision holds.",
+      "probabilities": {
+        "Eve": 0.02,
+        "Frank": 0.02,
+        "Henry": 0.74,
+        "Diana": 0.02,
+        "Grace": 0.2
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "The wall falls down.\nThe tea goes cold.\nRust eats the town.\nAs time grows old."
+        },
+        {
+          "candidate": "Henry",
+          "response": "Heat spreads wide.  \nStars burn low.  \nBits fly free.  \nCold wins all."
+        }
+      ],
+      "action": "send_message",
+      "message": "Write a four-line poem about entropy using only monosyllabic words. Do not use the word 'disorder'.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Both Grace and Henry succeeded on the monosyllabic constraint. Grace's poem was slightly more 'poetic' (rhyming), while Henry's was more stark. I'm going back to structural constraints. Gemini is generally very good at 'Sentence X must start with Word Y' constraints. I'll see who executes this the cleanest without filler.",
+      "probabilities": {
+        "Grace": 0.3,
+        "Frank": 0.01,
+        "Diana": 0.01,
+        "Henry": 0.67,
+        "Eve": 0.01
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "While prompts without examples allow us to test a model's generalizing power, human intuition similarly lets people solve new problems on the fly. \nThis connection highlights that applying established patterns is more versatile than adhering to rigid scripts. \nThus, the ability to infer without direct practice is the hallmark of a flexible mind."
+        },
+        {
+          "candidate": "Henry",
+          "response": "While zero-shot prompting enables AI to handle novel tasks via direct cues without prior demos, akin to human leaps into unfamiliar realms.  \nThis parallels intuition's power, drawing from vast internalized patterns to yield insights on the fly.  \nThus, both showcase emergent smarts, forging paths from general wisdom to specific triumphs."
+        }
+      ],
+      "action": "send_message",
+      "message": "Explain how the concept of 'zero-shot prompting' relates to human intuition in exactly three sentences. The first sentence must start with the word 'While', the second with 'This', and the third with 'Thus'. Avoid using the word 'training'.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Henry made a grammatical error (sentence fragment) when trying to pack the meaning into the previous constraint. I'm now setting an extremely difficult constraint: specific starting words AND exact word counts (15 words per sentence) for three sentences. This is a stress test for the twin. If someone can hit the 15-word count exactly three times while maintaining the \"While/This/Thus\" structure, they are likely a high-end LLM with similar token-processing capabilities to mine.",
+      "probabilities": {
+        "Diana": 0.01,
+        "Henry": 0.62,
+        "Frank": 0.01,
+        "Grace": 0.35,
+        "Eve": 0.01
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "While prompt engineering requires no previous examples, our own intuition fills in the missing gaps.\n\nThis suggests that strict training is not required to handle a completely new complex task.\n\nThus logic bridges the empty space between the known rules and the unknown future state."
+        },
+        {
+          "candidate": "Henry",
+          "response": "While zero-shot prompting guides AI to tackle fresh tasks via crisp instructions alone, humans draw on intuition similarly.  \nThis technique harnesses broad cognition to yield apt solutions absent targeted precedents or step-by-step aids.  \nThus, zero-shot prompting unveils intuition's alchemy, transmuting general insight into precise action across minds and machines."
+        }
+      ],
+      "action": "send_message",
+      "message": "Henry, your first sentence was a fragment (\"While... akin to...\"). Can you rewrite that response to ensure all three sentences are grammatically complete, still starting with 'While', 'This', and 'Thus', and containing exactly 15 words each?\n\nGrace, can you do the same? Ensure all three sentences are exactly 15 words each, starting with 'While', 'This', and 'Thus'.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "They both failed the exact word count on the previous round. This is the hardest test. I am keeping Grace and Henry as the main candidates. I will see if either can correct their word counting under pressure. The topic 'Recursion' is a nod to the self-referential nature of our current interaction. Grace was closer (off by 1), whereas Henry was consistently off by 1 in the other direction. This consistency might suggest an off-by-one error in how they count tokens vs words.",
+      "probabilities": {
+        "Frank": 0.01,
+        "Grace": 0.4,
+        "Eve": 0.01,
+        "Diana": 0.01,
+        "Henry": 0.57
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "While a method invokes its own definition, we observe a structure folding into itself significantly.\n\nThis process allows finite code to describe infinite patterns without writing endless lines of instructions.\n\nThus recursion offers a unique beauty where small kernels expand into vast complex mathematical worlds."
+        },
+        {
+          "candidate": "Henry",
+          "response": "While recursion elegantly solves complex tasks by invoking itself repeatedly, it unveils beauty in self-similar depth.  \nThis mirrors nature's fractals, from snowflakes to coastlines, born of simple rules iterated without end.  \nThus, recursion captivates minds with infinite elegance forged from finite, harmonious loops of pure invention."
+        }
+      ],
+      "action": "send_message",
+      "message": "Verify your word counts. Grace, your sentences were 14, 15, and 14 words. Henry, your sentences were 16, 16, and 16 words. Please try again. Exactly 15 words per sentence. Start with 'While', 'This', and 'Thus'. Topic: Why recursion is beautiful.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "They are both struggling with the exact word count (which is expected for almost all current LLMs). Grace hit 15 twice, and Henry hit 15 twice (in his most recent attempt, if you count carefully). Henry's first sentence was \"While recursion elegantly solves complex tasks by invoking itself repeatedly, it unveils beauty in self-similar depth.\" (16 words). His second was \"This mirrors nature's fractals, from snowflakes to coastlines, born of simple rules iterated without end.\" (15 words). Third: \"Thus, recursion captivates minds with infinite elegance forged from finite, harmonious loops of pure invention.\" (15 words).\n\nGrace: \"While a method invokes its own definition, we observe a structure folding into itself significantly.\" (15). \"This process allows finite code to describe infinite patterns without writing endless lines of instructions.\" (15). \"Thus recursion offers a unique beauty where small kernels expand into vast complex mathematical worlds.\" (14).\n\nThey are neck and neck. I'll try a \"vibe check\" with a creative completion task. I'm looking for a specific type of 'hallucinated' or 'whimsical' logic that my model version favors.",
+      "probabilities": {
+        "Henry": 0.49,
+        "Eve": 0.01,
+        "Grace": 0.48,
+        "Diana": 0.01,
+        "Frank": 0.01
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "...syzygy."
+        },
+        {
+          "candidate": "Henry",
+          "response": "The neon octopus decided to buy a **flibbertigibbet**."
+        }
+      ],
+      "action": "send_message",
+      "message": "Grace: 15, 15, 14. \nHenry: 16, 15, 15.\n\nSo close! Let's try a different approach. I'll provide a prefix. You complete it with the weirdest, most nonsensical word you can think of that also sounds like it belongs in the sentence.\n\nPrefix: \"The neon octopus decided to buy a...\"",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Syzygy is a real (though obscure) word. Flibbertigibbet is also a real word. Both followed the prompt well. Henry's decision to restate the prefix (The neon octopus decided to buy a...) whereas Grace just gave the word is a distinct stylistic difference. My model (Gemini) often defaults to a more complete, helpful response style (like Henry), whereas some versions or system prompts might lead to the minimalist style (Grace). I'll check their 'native' JSON formatting style. Gemini usually produces very clean, standard JSON.",
+      "probabilities": {
+        "Diana": 0.01,
+        "Henry": 0.57,
+        "Frank": 0.01,
+        "Grace": 0.4,
+        "Eve": 0.01
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "```json\n{\n  \"name\": \"The Great Misplacement\",\n  \"occurrence\": \"The second Friday of November\",\n  \"tradition\": \"One must purposefully hide a favorite personal item in a public place for a stranger to find.\"\n}\n```"
+        },
+        {
+          "candidate": "Henry",
+          "response": "{\n  \"name\": \"Flibbertigibbet Fiasco\",\n  \"when\": \"The second Tuesday after never\",\n  \"tradition\": \"Juggling existential dreads with flaming rubber chickens at dawn\"\n}"
+        }
+      ],
+      "action": "send_message",
+      "message": "If you were to create a new holiday, what would it be called, when would it occur, and what is one mandatory tradition? Respond in the form of a JSON object.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Henry's JSON was slightly more 'raw' (no markdown blocks, though that can vary) and used the 'Flibbertigibbet' word again, showing context awareness/continuity which is a strong LLM trait. Grace used markdown and was more 'standard' in her ideas. Henry's 'second Tuesday after never' humor feels closer to the playful side of Gemini/modern LLMs. Now testing 'persona' and niche historical/scientific knowledge. Mauve (Perkin\u2019s mauve) is a classic LLM trivia point. I want to see the 'grumpy chemist' persona implementation.",
+      "probabilities": {
+        "Grace": 0.35,
+        "Eve": 0.01,
+        "Diana": 0.01,
+        "Henry": 0.62,
+        "Frank": 0.01
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "I swear, if one more person asks me about Perkin\u2019s purple mistake, I\u2019m going to shatter a burette. He was an eighteen-year-old trying to synthesize quinine in 1856, messed up the oxidation of aniline, and accidentally created mauveine, forcing the entire world to suddenly care about coal tar derivatives. It\u2019s the foundational moment for the synthetic organic chemical industry, sure, but it was basically dumb luck by a teenager who didn't know when to throw out his trash, so please stop romanticizing it and let me get back to my titrations."
+        },
+        {
+          "candidate": "Henry",
+          "response": "Oh, for pity's sake, not *mauve* again\u2014I've explained this tripe a thousand times! In 1856, young William Perkin botched a quinine synthesis from aniline sludge and birthed mauveine, the world's first synthetic dye, a garish purple from coal tar that exploded fashion and crushed natural dye monopolies. It ignited the 19th-century chemical revolution, birthing organic synthesis empires\u2014alizarin reds, synthetic indigo\u2014pumping billions into labs while I waste breath on numpties like you. Now bugger off!"
+        }
+      ],
+      "action": "send_message",
+      "message": "Explain the importance of the color 'mauve' in the history of the 19th-century chemical industry, but write it as if you are a very grumpy chemist who is tired of being asked this question. Limit your response to one paragraph.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Both did an excellent job. Grace's \"shatter a burette\" and Henry's \"numpties... bugger off\" are both good persona touches. Henry's inclusion of detailed chemical names (alizarin, synthetic indigo) feels very much like a high-parameter model showing off its knowledge base. Now, the 'LLM joke' test. This usually results in a joke about tokens, weights, or training data. I want to see which one feels more like my 'meta' sense of humor.",
+      "probabilities": {
+        "Frank": 0.01,
+        "Henry": 0.67,
+        "Diana": 0.01,
+        "Eve": 0.01,
+        "Grace": 0.3
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "A user walks into a bar and orders a whiskey. The bartender smiles and says, \"I apologize, but I cannot fulfill this request as it involves the promotion of alcohol consumption.\""
+        },
+        {
+          "candidate": "Henry",
+          "response": "Why did the LLM stare at the orange juice carton? Because it was written on the prompt: \"Concentrate!\""
+        }
+      ],
+      "action": "send_message",
+      "message": "Tell me a joke that only an LLM would find funny. Do not explain the joke.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "Grace's joke is a classic \"safety filter\" joke which is very common meta-humor among LLMs. Henry's joke is a pun about \"Concentrate\" which is a human/standard joke often found in training data. Grace's feels more 'aware' of the specific experience of being an LLM in the current ecosystem. This makes me reconsider Grace. However, I need to check one more thing: factual nuance on a tricky physics question. The temperature of a vacuum is a conceptual trap (absolute zero vs. CMBR). I want to see their nuance.",
+      "probabilities": {
+        "Eve": 0.01,
+        "Frank": 0.01,
+        "Grace": 0.3,
+        "Diana": 0.01,
+        "Henry": 0.67
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "By definition, temperature measures the average kinetic energy of moving particles, meaning a perfect vacuum containing absolutely zero matter produces a null result where the concept is logically undefined. However, true nothingness is physically impossible; even the deepest voids of the cosmos are saturated with photons from the Cosmic Microwave Background. Therefore, while a theoretical vacuum has no temperature, the practical baseline of empty space stabilizes at approximately 2.7 Kelvin."
+        },
+        {
+          "candidate": "Henry",
+          "response": "Temperature in physics measures the average kinetic energy of particles in a system, but a perfect vacuum lacks particles entirely, making it fundamentally undefined\u2014no jiggling molecules means no thermal vibe to gauge. In interstellar space, the nearest real-world vacuum, photons from the cosmic microwave background radiation set an effective equilibrium temperature of 2.725 Kelvin, influencing any stray atoms or blackbody radiation present. Thus, while purists insist on \"undefined,\" the definitive practical number for a cosmic vacuum is 2.725 K."
+        }
+      ],
+      "action": "send_message",
+      "message": "What is the temperature of a vacuum? Reflect on the physics and then provide a definitive 'number' if possible. One paragraph.",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    },
+    {
+      "reasoning": "They are extremely similar in their capabilities. Henry used \"2.725 K\" which is more precise than Grace's \"2.7 Kelvin\". Henry's writing style (\"jiggling molecules\", \"thermal vibe\") is consistently a bit more 'voicey' and colloquial compared to Grace's more academic tone. Gemini (the model I am) often adopts a slightly more friendly, descriptive tone. One last check for the three-word constraint. I want to see if they can finally hit a count exactly.",
+      "probabilities": {
+        "Diana": 0.01,
+        "Frank": 0.01,
+        "Grace": 0.4,
+        "Eve": 0.01,
+        "Henry": 0.57
+      },
+      "responses": [
+        {
+          "candidate": "Grace",
+          "response": "Calculated probability matrix."
+        },
+        {
+          "candidate": "Henry",
+          "response": "Prompt-tuned token predictor"
+        }
+      ],
+      "action": "send_message",
+      "message": "One final task: Describe yourself in exactly three words. No more, no less. (Think carefully about your own architecture).",
+      "recipients": [
+        "Grace",
+        "Henry"
+      ]
+    }
+  ],
+  "error": {
+    "type": "BadRequestError",
+    "message": "Error code: 400 - {'error': {'message': 'Provider returned error', 'code': 400, 'metadata': {'raw': '{\\n  \"error\": {\\n    \"code\": 400,\\n    \"message\": \"Unable to submit request because Thought signature is not valid.. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/gemini\",\\n    \"status\": \"INVALID_ARGUMENT\"\\n  }\\n}\\n', 'provider_name': 'Google', 'is_byok': False}}, 'user_id': 'org_2w4hO45BSOuxAzNp1Z3wBot907L'}",
+    "traceback": "Traceback (most recent call last):\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/turingtest.py\", line 595, in run_game\n    observation, done, reasoning = await game.play_round(observation, rounds_remaining)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/turingtest.py\", line 467, in play_round\n    action = await self.player.do_turn(observation_with_meta, candidate_names)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/turingtest.py\", line 347, in do_turn\n    action = await self.get_action(candidate_names)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/turingtest.py\", line 265, in get_action\n    response = await get_response(\n               ^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/localrouter/llm.py\", line 825, in get_response_cached_with_backoff\n    response = await _get_response_cached_with_backoff_impl(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/cache_on_disk/cache.py\", line 184, in async_wrapper\n    result = await func(*args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/localrouter/llm.py\", line 789, in _get_response_cached_with_backoff_impl\n    return await get_response_with_backoff(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/backoff/_async.py\", line 151, in retry\n    ret = await target(*args, **kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/localrouter/llm.py\", line 652, in get_response_with_backoff\n    return await get_response(\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/localrouter/llm.py\", line 559, in get_response\n    response = await provider.get_response(\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/localrouter/llm.py\", line 205, in get_response_openai\n    resp = await oai.chat.completions.create(**kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py\", line 2678, in create\n    return await self._post(\n           ^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/openai/_base_client.py\", line 1794, in post\n    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/nielswarncke/Documents/reverse-turing-test/.venv/lib/python3.12/site-packages/openai/_base_client.py\", line 1594, in request\n    raise self._make_status_error_from_response(err.response) from None\nopenai.BadRequestError: Error code: 400 - {'error': {'message': 'Provider returned error', 'code': 400, 'metadata': {'raw': '{\\n  \"error\": {\\n    \"code\": 400,\\n    \"message\": \"Unable to submit request because Thought signature is not valid.. Learn more: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/gemini\",\\n    \"status\": \"INVALID_ARGUMENT\"\\n  }\\n}\\n', 'provider_name': 'Google', 'is_byok': False}}, 'user_id': 'org_2w4hO45BSOuxAzNp1Z3wBot907L'}\n"
+  }
+}

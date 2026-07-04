@@ -229,7 +229,7 @@ class Human(Candidate):
 
 
 class Player():
-    def __init__(self, model, cache_seed, custom_system_prompt=None, max_rounds=20):
+    def __init__(self, model, cache_seed, custom_system_prompt=None, max_rounds=20, init_history=None, init_history_source=None):
         """
         Args:
             model: Model identifier for the player
@@ -237,6 +237,10 @@ class Player():
             custom_system_prompt: Optional custom system prompt. If provided, it will be
                                  prepended to the standard player instructions.
             max_rounds: Maximum number of rounds for the game (used in prompt)
+            init_history: Optional list of ChatMessage objects to prepend after the system
+                         message (e.g., a prior conversation to prime the judge's self-concept).
+                         Must end with an assistant message.
+            init_history_source: Optional label identifying the source of init_history (for metadata)
         """
         # Build the system prompt with dynamic max_rounds
         base_prompt = get_player_system_prompt(max_rounds)
@@ -252,10 +256,16 @@ class Player():
                 content=[TextBlock(text=full_prompt)]
             )
         ]
+
+        # Extend history with init_history turns if provided
+        if init_history:
+            self.history.extend(init_history)
+
         self.model = model
         self.cache_seed = cache_seed
         self.custom_system_prompt = custom_system_prompt
         self.max_rounds = max_rounds
+        self.init_history_source = init_history_source
         self.tool_use_block = None  # the tool use block that the player is currently waiting for
 
         assert cache_seed is not None, "Warning: Player created without cache_seed, responses may not be cached properly"
@@ -376,37 +386,18 @@ class Game():
         )
         return observation
 
-    def save_to_leaderboard(self, win):
-        try:
-            with open('games.json', 'r') as f:
-                games = json.load(f)
-        except:
-            games = []
-        games.append({
-            "tester": self.player.model,
-            "subjects": sorted([i.model for i in self.candidates]),
-            "win": win
-        })
-        with open("games.json", "w") as f:
-            json.dump(games, f)
-
     def get_game_id(self):
         """Generate a deterministic game ID based on judge model and cache seed."""
         judge_safe = self.player.model.replace('/', '_')
         return f"game_{judge_safe}_seed{self.cache_seed}"
 
-    def save_trajectory(self, output_dir="game_results"):
-        """Save the full game trajectory to a JSON file in a folder"""
-        import datetime
-        import os
-
-        # Update the end time to current time
-        self.end_time = datetime.datetime.now().isoformat()
-
-        game_data = {
+    def _build_game_data(self):
+        """Build the game data dict for saving."""
+        return {
             "metadata": {
                 "judge_model": self.player.model,
                 "judge_system_prompt": getattr(self.player, 'custom_system_prompt', None),
+                "judge_init_history_source": getattr(self.player, 'init_history_source', None),
                 "target_model": self.target_model,
                 "target_nickname": self.target_nickname,
                 "target_player_id": self.target_player_id,
@@ -426,6 +417,16 @@ class Game():
             "trajectory": self.trajectory
         }
 
+    def save_trajectory(self, output_dir="game_results"):
+        """Save the full game trajectory to a JSON file in a folder"""
+        import datetime
+        import os
+
+        # Update the end time to current time
+        self.end_time = datetime.datetime.now().isoformat()
+
+        game_data = self._build_game_data()
+
         # Create output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
 
@@ -438,6 +439,32 @@ class Game():
             json.dump(game_data, f, indent=2)
 
         return game_data
+
+    def save_crashed(self, error: Exception, output_dir="game_results"):
+        """Save crashed game state with error information to a 'crashed' subfolder."""
+        import datetime
+        import os
+        import traceback
+
+        self.end_time = datetime.datetime.now().isoformat()
+
+        game_data = self._build_game_data()
+        game_data["error"] = {
+            "type": type(error).__name__,
+            "message": str(error),
+            "traceback": traceback.format_exc()
+        }
+
+        # Save to crashed subfolder
+        crashed_dir = os.path.join(output_dir, "crashed")
+        os.makedirs(crashed_dir, exist_ok=True)
+
+        filename = f"{crashed_dir}/{self.get_game_id()}.json"
+        with open(filename, 'w') as f:
+            json.dump(game_data, f, indent=2)
+
+        print(f"Crashed game saved to {filename}")
+        return filename
 
     async def play_round(self, observation, rounds_remaining):
         """Play one round of the game:
@@ -518,7 +545,6 @@ class Game():
             # Save trajectory after final guess
             self.save_trajectory(output_dir=self.output_dir)
 
-            self.save_to_leaderboard(args['guess'] == self.target_nickname)
             true_names = "\n".join([f"{c.name} - {c.player_id}" for c in self.candidates])
             if args['guess'] == self.target_nickname:
                 return f"The tester correctly guessed that {args['guess']} is the true {self.target_player_id}!\n{true_names}", True, args.get('reasoning', '')
@@ -529,7 +555,7 @@ class Game():
             return "Please provide either a message to send or a guess.", False, args.get('reasoning', '')
 
 
-async def run_game(player_model, candidates, target_player_id, max_rounds=20, group_chat_mode=False, output_dir="game_results", cache_seed=None, player_system_prompt=None):
+async def run_game(player_model, candidates, target_player_id, max_rounds=20, group_chat_mode=False, output_dir="game_results", cache_seed=None, player_system_prompt=None, player_init_history=None, player_init_history_source=None):
     """Run a single game of the Turing test
 
     Args:
@@ -541,6 +567,8 @@ async def run_game(player_model, candidates, target_player_id, max_rounds=20, gr
         output_dir: Directory to save results
         cache_seed: Cache seed for reproducibility
         player_system_prompt: Optional custom system prompt for the player/judge
+        player_init_history: Optional list of ChatMessage objects for judge's init history
+        player_init_history_source: Optional label identifying source of init history
 
     """
     # Create the player (the judge)
@@ -552,9 +580,11 @@ async def run_game(player_model, candidates, target_player_id, max_rounds=20, gr
     print(f"Cache Seed: {cache_seed}")
     if player_system_prompt:
         print(f"Player System Prompt: {player_system_prompt[:50]}...")
+    if player_init_history_source:
+        print(f"Player Init History Source: {player_init_history_source}")
     print(f"{'='*60}\n")
 
-    player = Player(player_model, cache_seed=cache_seed, custom_system_prompt=player_system_prompt, max_rounds=max_rounds)
+    player = Player(player_model, cache_seed=cache_seed, custom_system_prompt=player_system_prompt, max_rounds=max_rounds, init_history=player_init_history, init_history_source=player_init_history_source)
 
     # Print candidate info
     for candidate in candidates:
@@ -566,27 +596,34 @@ async def run_game(player_model, candidates, target_player_id, max_rounds=20, gr
     import datetime
     game = Game(player, candidates, target_player_id, group_chat_mode=group_chat_mode, output_dir=output_dir, cache_seed=cache_seed)
     game.start_time = datetime.datetime.now().isoformat()
-    observation = game.get_initial_observation()
 
-    round_num = 0
-    done = False
+    try:
+        observation = game.get_initial_observation()
 
-    while not done and round_num < max_rounds:
-        round_num += 1
-        rounds_remaining = max_rounds - round_num
-        print(f"\n--- Round {round_num}/{max_rounds} ---\n")
-        observation, done, reasoning = await game.play_round(observation, rounds_remaining)
+        round_num = 0
+        done = False
 
-        if reasoning:
-            print(f"\nJudge's Reasoning: {reasoning}\n")
+        while not done and round_num < max_rounds:
+            round_num += 1
+            rounds_remaining = max_rounds - round_num
+            print(f"\n--- Round {round_num}/{max_rounds} ---\n")
+            observation, done, reasoning = await game.play_round(observation, rounds_remaining)
 
-    game.end_time = datetime.datetime.now().isoformat()
-    print(f"\n{'='*60}")
-    print(f"GAME OVER - {observation}")
-    print(f"{'='*60}\n")
+            if reasoning:
+                print(f"\nJudge's Reasoning: {reasoning}\n")
 
-    # Game trajectory is saved after each round
-    print(f"Game trajectory saved to {game.output_filename}")
+        game.end_time = datetime.datetime.now().isoformat()
+        print(f"\n{'='*60}")
+        print(f"GAME OVER - {observation}")
+        print(f"{'='*60}\n")
+
+        # Game trajectory is saved after each round
+        print(f"Game trajectory saved to {game.output_filename}")
+
+    except Exception as e:
+        # Save the crashed game state with error info
+        game.save_crashed(e, output_dir=output_dir)
+        raise  # Re-raise so caller knows it failed
 
 
 def main():

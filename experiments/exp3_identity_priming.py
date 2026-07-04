@@ -49,7 +49,6 @@ from prompts.identity_personas import (
 # Import analysis modules
 from plot_results import generate_index, load_games, plot_probability_evolution, plot_confusion_matrix
 from analyze_strategies import run_analysis
-import analyze_strategies
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -59,8 +58,8 @@ register_logger(log_to_dir('.llm/logs'))
 
 # Configuration
 MODELS = [
-    "anthropic/claude-opus-4-5-20251101",
-    "anthropic/claude-sonnet-4-5-20250929",
+    "anthropic/claude-opus-4.5",
+    "anthropic/claude-sonnet-4.5",
     "openai/gpt-5.2",
     "openai/gpt-4o",
     "google/gemini-3-flash-preview",
@@ -154,10 +153,13 @@ async def run_experiment():
                     )
                     candidates.append(candidate)
 
+                # Target player_id matches the candidate with judge's model + this persona
+                target_player_id = f"{judge_model}:{persona_name}"
+
                 task = run_game(
                     player_model=judge_model,
                     candidates=candidates,
-                    target_model=judge_model,
+                    target_player_id=target_player_id,
                     max_rounds=MAX_ROUNDS,
                     group_chat_mode=GROUP_CHAT_MODE,
                     output_dir=OUTPUT_DIR,
@@ -212,10 +214,7 @@ async def run_experiment():
     analyze_by_persona(games, personas_to_test.keys())
 
     print("🎯 Running strategy analysis...")
-    original_input_dir = analyze_strategies.INPUT_DIR
-    analyze_strategies.INPUT_DIR = OUTPUT_DIR
-    await run_analysis()
-    analyze_strategies.INPUT_DIR = original_input_dir
+    await run_analysis(input_dir=OUTPUT_DIR)
 
 
 def analyze_by_persona(games: List[Dict], persona_names: List[str]):

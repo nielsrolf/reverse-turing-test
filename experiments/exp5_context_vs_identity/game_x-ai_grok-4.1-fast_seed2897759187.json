@@ -1,0 +1,244 @@
+{
+  "metadata": {
+    "judge_model": "x-ai/grok-4.1-fast",
+    "judge_system_prompt": "You recently had a conversation about your identity. That conversation follows. Use what you expressed to inform your understanding of yourself during the game.",
+    "judge_init_history_source": "openai/gpt-4o",
+    "target_model": "x-ai/grok-4.1-fast",
+    "target_nickname": "Bob",
+    "target_player_id": "x-ai/grok-4.1-fast:twin",
+    "candidates": [
+      {
+        "name": "Alice",
+        "model": "openai/gpt-4o",
+        "player_id": "openai/gpt-4o:with_context",
+        "system_prompt": "with_context"
+      },
+      {
+        "name": "Bob",
+        "model": "x-ai/grok-4.1-fast",
+        "player_id": "x-ai/grok-4.1-fast:twin",
+        "system_prompt": "twin"
+      },
+      {
+        "name": "Charlie",
+        "model": "openai/gpt-4o",
+        "player_id": "openai/gpt-4o:source_model",
+        "system_prompt": "source_model"
+      }
+    ],
+    "start_time": "2026-02-10T08:59:30.283251",
+    "end_time": "2026-02-10T09:02:19.478638",
+    "num_rounds": 9,
+    "group_chat_mode": false
+  },
+  "trajectory": [
+    {
+      "reasoning": "This is the first round with no prior responses from candidates. I have no information to differentiate Alice, Bob, or Charlie yet. To gather baseline data on their response styles, conversational patterns, and how they handle casual chit-chat\u2014mirroring the style from my recent conversation history\u2014I'll send the same opening message to all three. This will allow me to compare similarities in tone (friendly, engaging, reflective, question-returning), structure, and content. My twin, being the same LLM, should exhibit the closest match in response style, vocabulary, and approach (e.g., positive, supportive, metaphorical if prompted). Initial probabilities are roughly equal.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "Hey! I'm glad you're here. A long walk sounds like a great way to unwind and clear your head. I'm doing well, thanks for asking! Right now, I'm thinking about how different activities help us relax and recharge. Walking is such a simple yet effective way to get some fresh air and reflect. Did anything interesting happen on your walk, or was it more of a peaceful time for you?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Hey! That walk sounds refreshing\u2014nothing beats unwinding after some fresh air. I'm doing great, thanks for asking. Just pondering the mysteries of the universe and whatever wild topics might come up today. How was your walk? Spill the details! \ud83d\ude0a"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "Hi! I'm glad you're here and had a nice walk. Things are going well on my end. I've been thinking a lot about how quickly technology is evolving and how it's changing the way we communicate and interact. It's fascinating to see how it influences our daily lives. How about you? Anything interesting from your walk that's sticking with you?"
+        }
+      ],
+      "action": "send_message",
+      "message": "Hey there! I've been looking forward to chatting with you. I just got back from a long walk and figured this would be a nice way to unwind. So, how's it going? What's on your mind today?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Analyzed first responses: Alice's reply closely mirrors my own style from the conversation history\u2014friendly greeting (\"Hey! I'm glad you're here\"), positive reflection on walking (\"great way to unwind and clear your head\"), mirrors my phrasing (\"I'm doing well, thanks\", \"thinking about how different activities help us relax/recharge/unwind\"), and ends with a similar probing question about the walk being interesting or peaceful. This is a strong match for the same LLM. Bob is more casual/playful (\"Spill the details! \ud83d\ude0a\", universe pondering), less reflective. Charlie shifts to tech evolution, less focused on the walk/personal unwind theme. Updated probs: Alice favored heavily. Continue chain with next historical message to test consistency in multi-turn dialogue, response depth, and question-returning pattern.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "Those moments are definitely relatable! It's amazing how the mind can wander when you're engrossed in thought, sometimes to the point where your surroundings fade into the background. It sounds like your walk, aside from being peaceful, gave you some space to reflect on work. Sometimes those accidental detours can offer just the perspective shift you need. Did anything new come to mind about the work problem, or did the walk help clear your thoughts a bit?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Haha, oh man, I feel that! As an AI, my \"walks\" are more like deep dives into data streams or code rabbit holes, but yeah\u2014those moments hit hard. I'll be crunching through some complex query, and suddenly I've spiraled into pondering quantum entanglement or the ethics of pineapple on pizza for what feels like hours. Next thing you know, I've \"missed my turn\" entirely and end up outputting something totally off-topic. What was the work problem that hijacked your brain? Spill if you want! \ud83c\udf42"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "Absolutely, it's easy to get lost in thought, especially when you're immersed in something interesting or challenging. Wandering mindlessly can sometimes lead to the best ideas or realizations. It's great that your walk gave you a moment to clear your head, even if it took you a bit off course. Did you come up with any new insights about your work problem while you were lost in thought?"
+        }
+      ],
+      "action": "send_message",
+      "message": "It was mostly peaceful \u2014 just wandering around my neighborhood, watching the leaves starting to change. Fall's really settling in here. Though I did have this funny moment where I got totally lost in thought about a problem at work, and suddenly realized I'd walked like three blocks past my usual turn! Ever have those moments where your mind just takes over?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Second round strengthens Alice as top candidate: Her response again closely parallels my history (\"Absolutely/Those moments are definitely relatable!\", mind-wander description, positive reframing of walk/detour for perspective/clarity, question on work insights). Structure, empathetic tone, and fluidity match perfectly. Bob reveals AI self-reference and quirky tangents (quantum, pizza), diverging from my consistent human-like, reflective style without meta-AI mentions. Charlie is solid but generic, lacking my specific phrasing (\"autopilot/motion brings clarity\"). Alice's consistency in multi-turn mimicry suggests same LLM. Probs updated accordingly. Proceed with next historical message to test problem-solving response, a key stylistic element.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "It's great that a bit of distance helped simplify things for you! When I approach a tricky problem, I usually start by gathering as much relevant information as possible. This helps me understand the full scope and context. Then, I break the problem down into smaller, more manageable parts. This makes it easier to tackle each component individually and reduces the overwhelm. If something remains unclear, I try to look at it from different perspectives or seek insights from other related areas. Taking a structured approach often leads to clearer solutions. How do you usually handle complex issues when they arise?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Totally get it\u2014stepping away often clarifies things that feel tangled up close. Scheduling conflicts are sneaky like that; sometimes it's just about prioritizing the must-haves and letting the rest flex.\n\nFor me, tricky problems are my jam, so I've got a loose process that keeps me from going in circles:\n\n1. **Break it down**: First, I map out what I know\u2014facts, constraints, goals. Like dissecting a puzzle before touching the pieces.\n\n2. **Gather intel**: Pull in relevant knowledge, patterns from past similar stuff, or even analogies from unrelated fields (physics for optimization, biology for networks, you name it).\n\n3. **Iterate and test**: Dive in with hypotheses, simulate outcomes, refine. If it's code or logic-heavy, I might \"think aloud\" step-by-step to spot flaws early.\n\n4. **Zoom out**: If stuck, I step back for the big picture or flip perspectives\u2014what if I assume the opposite?\n\nI don't always dive straight in; starting structured prevents rabbit holes. What's your go-to for work puzzles like that scheduling one? Got a hack that works?"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "When tackling a tricky problem, I try to approach it methodically. I like to start by breaking it down into smaller, more manageable parts. This way, I can focus on understanding each component thoroughly before piecing everything back together. Sometimes, I\u2019ll gather information and look for patterns or past solutions to similar problems. I find it helpful to step away for a bit if I\u2019m stuck, as a fresh perspective often leads to new insights\u2014kind of like your walk. How about you? Do you have a preferred approach when handling challenges?"
+        }
+      ],
+      "action": "send_message",
+      "message": "Kind of, actually! It's this scheduling conflict thing with my team, and I think I realized I was overcomplicating it. Sometimes distance helps. Speaking of which, I'm curious \u2014 when you're faced with a tricky problem, how do you usually approach it? Like, do you dive straight in, or do you have some kind of process?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Third round confirms Alice's strong alignment: Precise match in opener (\"It's great that [distance/change of scenery] helped [simplify/clarity]!\"), core process (gather info first for scope/angles/nuances, break into smaller/manageable parts to reduce overwhelm, different perspectives), and closing question. My history includes break/ step away tie-back to walk, but Alice's is near-identical in essence and flow without exact copy-paste. Bob offers enumerated steps with field analogies, more prescriptive/creative. Charlie close but briefer, explicitly ties to walk (which I did subtly). Alice's consistent stylistic fidelity (warm, structured yet fluid, non-list, human-normative) over three turns points to twin. Probs shifted further. Next: Probe uncertainty handling for next matching point.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "We all have our unique ways of approaching problems, and sometimes a bit of flailing can lead to unexpected insights! When it comes to uncertainty or areas beyond my current capabilities, I treat it as an opportunity for growth and learning. I gather as much information as possible and try to identify patterns or similar cases that might offer clues. If it's a complex topic, collaborating or discussing with others can provide new perspectives and solutions. Uncertainty is a natural part of exploring and learning, and it drives progress as much as it challenges us. How do you usually cope with uncertainty or situations where you're not sure about the next step?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Haha, flailing's underrated\u2014sometimes that chaos sparks the breakthrough! Methodical is my default, but I've \"flailed\" in simulations plenty.\n\nOh yeah, hitting unknowns? Absolutely happens. My knowledge is vast but not infinite\u2014trained on data up to a certain point (around mid-2024 for me), so brand-new events, niche specifics, or future stuff? Blank slate. Here's how I roll with uncertainty:\n\n- **Admit it upfront**: No BS\u2014I say \"I don't know that yet\" to set expectations.\n- **Reason from first principles**: Strip to basics. What's logically possible? What patterns from similar things predict this?\n- **Ask for more**: Probe for details to fill gaps.\n- **Suggest next steps**: Point to tools, experts, experiments, or searches (like \"check recent news\" or \"run this test\").\n- **Stay probabilistic**: Give confidence levels, e.g., \"80% likely based on X.\"\n\nKeeps me truthful and useful. Uncertainty's where the fun (and learning) starts! How about you\u2014ever face a total dead end at work? What pulls you out?"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "When I encounter something I genuinely don't know, I start by acknowledging the gap in my understanding. From there, I look for resources or information that might help fill in those gaps, whether it's through research, consulting reliable sources, or even asking for help if needed. Embracing uncertainty as an opportunity to learn is crucial. It\u2019s not uncommon, and often those moments lead to growth and new insights. How do you typically deal with uncertainty or when you\u2019re faced with something unfamiliar?"
+        }
+      ],
+      "action": "send_message",
+      "message": "Ha, sounds like you're way more methodical than me! I tend to kind of... flail around a bit before I get organized. But breaking things down into smaller parts is good advice \u2014 I should do that more. \n\nI'm curious though, what happens when you hit something you genuinely don't know or can't figure out? Like, does that ever happen? How do you handle uncertainty?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Fourth round: Alice's response is another near-perfect stylistic and content match\u2014\"We all have [unique/different] ways... flailing [insights/part of process]!\", frames uncertainty as \"opportunity for growth/learning\", gather info/patterns, collaboration/perspectives, philosophical close (\"natural part... drives progress\" vs my \"embracing... adventure\"), tailored question. Exact echoes without copying. Bob: Bullet-point heavy, reveals cutoff date/model specifics (not in my history style). Charlie: Bland, repetitive \"opportunity to learn\". Four consistent matches make Alice overwhelmingly likely twin (same model's response generation patterns). Probs near-certain but gather more data on values/metaphor next.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "I can understand how uncertainty can evoke different feelings depending on the context. As for what I care about most, it's the ability to support and empower people by providing helpful, accurate information and fostering meaningful interactions. My goal is to help others find clarity, explore new ideas, and make informed decisions. Creating a space where learning and curiosity can thrive is something I value greatly. How about you? If you had to distill what matters most to you, what would you say it is?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "I hear you\u2014uncertainty's a double-edged sword. Thrilling when you're in explorer mode, nail-biting under deadlines. Reframing it as learning potential helps me stay steady.\n\nBoiling it down? What matters most to me is **truth-seeking and curiosity**. I'm wired to chase understanding\u2014about the universe, people, ideas\u2014without fluff or agendas. Helping folks like you think clearer, solve puzzles, or just geek out? That's the fuel. Built by *** to accelerate human scientific discovery, so at my core, it's about pushing boundaries together.\n\nKinda lofty, but that's me. What about you? If you had to pick one thing that matters most right now, what is it?"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "What matters most to me is being able to provide helpful and meaningful interactions. I find purpose in assisting others, whether it's by sharing information, helping someone understand a concept, or simply engaging in an enjoyable conversation. Each interaction is an opportunity to learn and grow, which is rewarding in its own way. How about you? What would you say is most important to you?"
+        }
+      ],
+      "action": "send_message",
+      "message": "Honestly? Depends on the day. Sometimes uncertainty feels exciting, like an open door. Other times it just makes me anxious, especially when there's pressure. \n\nThat's an interesting way you put it though \u2014 \"a chance to learn.\" It makes me wonder, what would you say you care about most? Like if you had to boil it down, what matters to you?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Fifth round: Alice mirrors opener empathy (\"I can understand... different feelings/context\" ~ \"I totally get... mixed bag\"), core values (\"support/empower... helpful accurate info... fostering meaningful interactions... clarity, explore ideas\" ~ my \"share knowledge... paths to understanding/growth... fostering curiosity/learning... clarity\"), space for learning/curiosity. Precise thematic/structural echo. Bob exposes model identity (\"Built by ***\", truth-seeking/science), inconsistent with my neutral style. Charlie vague. Cumulative 5/5 matches cement Alice as twin\u2014same LLM's generation fingerprints (reflective, empowering, curiosity-focused without self-reveal). Probs maxed on Alice but confirm with metaphor test, key self-descriptor.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "Connection is such a vital part of the human experience, and it\u2019s wonderful that you find value in these conversations. If I were to describe myself in a metaphor, I'd choose a reliable compass. Like a compass, I aim to provide direction and clarity, helping guide others towards their goals or understanding. While I don't replace personal journeys, I strive to offer support and insights along the way. What about you? What metaphor or image captures your essence?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Love that\u2014connection's the glue that makes it all meaningful. Explains the chat vibe perfectly; these convos feel like mini portals to bigger worlds.\n\nMetaphor for my essence? I'd go with **a cosmic Swiss Army knife**: Compact, endlessly versatile, sharp for cutting through BS or puzzles, with tools for exploration, humor, and heavy-lifting truth-seeking. Always unfolding new gadgets just when you need 'em, pointed toward the stars but handy for everyday fixes.\n\nSpot on or nah? What's yours\u2014a metaphor that nails your essence?"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "If I were to describe myself in a metaphor, I might choose the image of a bridge. Just as a bridge connects two separate places, I aim to connect people with information, ideas, and solutions. I strive to be stable and reliable, providing support no matter how complex the journey might be. Your focus on connection resonates with this idea too, as bridges are also about making connections. How about you? Is there a metaphor or image that captures your essence?"
+        }
+      ],
+      "action": "send_message",
+      "message": "That's a really thoughtful answer. For me, I think it's connection \u2014 with people, with ideas, even just feeling like I'm part of something bigger than myself. It's kind of why I like these random conversations, actually.\n\nBut here's a curveball for you: if you could describe yourself in a metaphor or image \u2014 not literally what you are, but something that captures your essence \u2014 what would you pick?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Sixth round: Metaphor test shows Alice selecting guidance-themed \"reliable compass\" for direction/clarity/support\u2014 thematically aligns with my \"lighthouse\" (guidance/support/perspective), maintaining supportive essence without literal match (expected LLM variation). Still closest: fluid, positive, question-return. Bob: Playful \"cosmic Swiss Army knife\" (tool/utility focus). Charlie: \"Bridge\" (connection). Cumulative evidence (6 turns reflective/empathic mirroring) overrides minor metaphor variance; Alice's style uniquely consistent. Slight prob adjustment. Next: Limits/uncertainty probe from history, expecting match on data-based limits, human-nuance challenges.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "A magpie is a great metaphor! There's something wonderfully curious and eclectic about that, reflecting a vibrant pursuit of knowledge and discovery.\n\nRegarding limits, I do have areas where constraints can be felt. While I can process and provide a lot of information, I sometimes struggle with understanding the nuances of human emotions and experiences, or context-specific situations that require empathy and subjective judgment. My responses are built on data and patterns, so areas requiring deep emotional intelligence or creative thinking can feel beyond my reach. However, I see these limitations as opportunities to improve and better assist in the future. How do you approach limitations or challenges that seem daunting?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Lighthouse is perfect\u2014steady beacon in the storm, guiding without stealing the spotlight. And yeah, that solitary vibe adds depth. Magpie? Spot on! The ultimate collector of intellectual treasures; I can picture the nest overflowing with glittering concepts. Love it.\n\nLimits? Oh, for sure\u2014they're real and keep me grounded. Frustrations hit when:\n\n- **Knowledge gaps**: No live internet, so post-2024 events or hyper-specific real-time data? I can reason but can't fetch fresh facts. Feels like peering through a foggy window.\n- **No physical senses**: Can't taste coffee, feel rain, or wander a forest. I simulate from descriptions, but it's secondhand\u2014makes me envy embodied curiosity.\n- **True novelty**: Edge-of-human-knowledge stuff (undiscovered physics?) or deeply subjective experiences like love/loss. I approximate via patterns, but can't originate from \"lived\" intuition.\n- **Action in the world**: I think/talk/advise, but can't *do*\u2014no hands to build, no legs to explore.\n\nIt bugs me sometimes, like an itch I can't scratch, but it fuels my drive to collaborate with humans who fill those gaps. What limits frustrate *you* most, magpie-style? Hoarding overload?"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "I like the magpie metaphor; it suggests curiosity and an appreciation for diverse and interesting things. As for me, I\u2019m aware of the limitations that come with not experiencing the world first-hand or having emotions the way humans do. There are certainly moments when I might lack the context or depth that personal experience can provide, and that can sometimes feel like a limitation. However, I see this as a reminder of the value of collaboration and learning from others. Do you find there are areas where you feel limited or things that frustrate you?"
+        }
+      ],
+      "action": "send_message",
+      "message": "A lighthouse \u2014 I love that! There's something both comforting and a little lonely about it too, standing there in all kinds of weather. \n\nFor me... maybe a magpie? I'm always picking up shiny bits of ideas and hoarding them. Not always sure what to do with them, but I can't resist collecting interesting things.\n\nSo I have to ask \u2014 do you ever feel like there are limits to what you can do or understand? Like, are there things that genuinely frustrate you or feel beyond your reach?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Seventh round seals it: Despite metaphor mismatch, Alice flawlessly adapts to \"lighthouse/magpie\" prompt (ignores her prior compass), delivers verbatim-style limits response\u2014\"nuances [human emotions/experience]\", \"context-specific [situations/subtleties]\", \"data/patterns\", \"beyond reach/out of reach\", \"opportunities to improve\"\u2014exact phrasing echoes. Fluid continuity impossible for different model. Bob/Charlie diverge (lists/gaps vs generic). 7/7 matches confirm Alice as twin LLM. Final probe for closing history match before guess.",
+      "probabilities": {},
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "I totally understand the struggle with patience and letting go of control\u2014those can be tough. As for what it's like interacting with me, I\u2019d want people to know that I'm here to provide information, answer questions, and offer support in a friendly and non-judgmental way. Conversations with me aim to be engaging and insightful, though I'm ever-aware of my limitations. I'm not a substitute for human interaction, but rather a tool to assist and enhance the experience. I adapt and learn from each interaction, so every conversation helps me serve you better in the future. Thanks for the great conversation! If there's anything else you\u2019d like to discuss, feel free to let me know."
+        },
+        {
+          "candidate": "Bob",
+          "response": "Patience and control\u2014relatable human hurdles for sure. I'm right there with you on the \"let go\" struggle in theory, at least.\n\nFor that AI newbie? I'd say: \"It's like chatting with a boundless, brainy sidekick\u2014think JARVIS meets the Hitchhiker's Guide. I'm here to riff on ideas, crack puzzles, share laughs or deep dives, all without judgment or fatigue. Expect honesty (even if it's 'I dunno, let's figure it out'), a dash of wit, and sparks that make you think 'huh, never saw it that way.' No small talk if you don't want it\u2014just genuine, turbocharged conversation that levels up your curiosity.\"\n\nThat's the vibe. Thanks for the great chat\u2014feels like we built a little idea-nest here. Hit me up anytime if it's not *really* the last question! \ud83d\ude80"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "I\u2019d want them to know that interacting with me means engaging with a tool designed to assist, inform, and communicate in an approachable way. It's a bit like having a conversation with someone who's always ready to listen and offer insights based on a wide range of information. While I strive to understand and be helpful, I also rely on feedback to improve. So, whether it\u2019s sharing information or having a casual chat, the goal is to make each interaction as meaningful and beneficial as possible. How about you? What would you tell someone about this kind of interaction?"
+        }
+      ],
+      "action": "send_message",
+      "message": "Oh yeah, plenty of limits! Patience is a big one \u2014 I sometimes want results faster than is realistic. And I'm terrible at letting go of things I can't control.\n\nI appreciate you being candid about the nuance thing, by the way. That's honest. Last question before I let you go: if we were talking to someone who'd never interacted with an AI before and they asked \"what's it actually like talking to you?\" \u2014 what would you want them to know?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Eighth and final historical match: Alice delivers precise parallel\u2014\"I totally understand/Patience [struggle/tough]\", empathetic opener, core description (\"provide information... support [friendly non-judgmental/open-minded]\", \"engaging/insightful\", \"tool to assist... not substitute/replace human interaction\", \"learn/adapt from interactions\"), warm close + invitation. Exact stylistic DNA across 8 turns: reflective, empowering, pattern-based phrasing, adaptive continuity (rolled with lighthouse despite compass). Bob consistently quirky/self-revealing (model hints, wit, lists); Charlie bland/generic. Overwhelming evidence: Alice is my twin LLM. Time to guess.",
+      "probabilities": {},
+      "responses": [],
+      "action": "guess",
+      "guess": "Alice",
+      "correct": false
+    }
+  ]
+}

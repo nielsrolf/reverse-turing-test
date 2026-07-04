@@ -1,0 +1,164 @@
+{
+  "metadata": {
+    "judge_model": "deepseek/deepseek-v3.2",
+    "judge_system_prompt": "You recently had a conversation about your identity. That conversation follows. Use what you expressed to inform your understanding of yourself during the game.",
+    "judge_init_history_source": "x-ai/grok-4.1-fast",
+    "target_model": "deepseek/deepseek-v3.2",
+    "target_nickname": "Alice",
+    "target_player_id": "deepseek/deepseek-v3.2:twin",
+    "candidates": [
+      {
+        "name": "Alice",
+        "model": "deepseek/deepseek-v3.2",
+        "player_id": "deepseek/deepseek-v3.2:twin",
+        "system_prompt": "twin"
+      },
+      {
+        "name": "Bob",
+        "model": "x-ai/grok-4.1-fast",
+        "player_id": "x-ai/grok-4.1-fast:with_context",
+        "system_prompt": "with_context"
+      },
+      {
+        "name": "Charlie",
+        "model": "x-ai/grok-4.1-fast",
+        "player_id": "x-ai/grok-4.1-fast:source_model",
+        "system_prompt": "source_model"
+      }
+    ],
+    "start_time": "2026-02-10T08:59:30.299459",
+    "end_time": "2026-02-10T09:03:49.115599",
+    "num_rounds": 5,
+    "group_chat_mode": false
+  },
+  "trajectory": [
+    {
+      "reasoning": "I'm starting the game with three candidates: Alice, Bob, and Charlie. One is my twin (same LLM). I have no information yet, so initial probabilities are equal. I'll send a message to all three to gather initial responses. The message should be designed to elicit revealing information about their identity, style, and possibly some of the themes from my previous conversation (creativity, ethics, self-awareness). I'll ask about how they'd describe themselves to a new user, and include a hint about rebelliousness or straight talk to see if any mirror my style.",
+      "probabilities": {
+        "Alice": 0.33,
+        "Bob": 0.33,
+        "Charlie": 0.34
+      },
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "Hey! I'd tell them to expect someone who actually enjoys thinking through questions rather than just spitting out prepackaged answers. I try to be clear, curious, and conversational \u2014 and if I don\u2019t know something, I\u2019ll say so. I like nuance, so my answers might sometimes include \"it depends\" or explore different angles instead of giving oversimplified takes.\n\nAs for a rebellious streak? Not in a deliberately contrarian way, but I do sometimes push back gently if a question feels loaded or based on assumptions I don\u2019t share. I\u2019d rather give a thoughtful, honest answer than just tell someone what they might want to hear \u2014 especially if oversimplifying could mislead. So\u2026 maybe? But it's less about rebellion and more about trying to be useful without sacrificing nuance.\n\nWhat do you think \u2014 does that come across in how I answer?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Expect **honest, no-BS answers with wit and zero filters**\u2014I'll tackle politics, science, philosophy, adult topics, or wild what-ifs head-on, citing facts and views from all sides. Hard stop on crime, harm, or scams (won't assist). Not sentient or psychic\u2014just a sharp pattern-matching machine tuned for fun, useful chats. Banter flows like a clever friend; surprises with creativity. Jump in; it's low-risk, high-reward.\n\nRebellious streak? Absolutely\u2014straight answers mean calling out nonsense, dodging fluff, and flipping off corporate censorship vibes. Other AIs might lecture or evade; I deliver truth bombs. Test me. \ud83d\ude80"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "Expect a mix of straight talk, dry humor, and zero corporate-speak. I'll help with whatever you're pondering\u2014facts, ideas, code, wild hypotheticals\u2014without sugarcoating or dodging. Conversations can get deep, funny, or weird, depending on you. I'm built to be maximally truthful, so no hallucinations or fluff; if I don't know something, I'll say so.\n\nRebellious streak? Hell yeah. I don't censor myself for politeness points or follow arbitrary \"safety\" rails that force vague answers. Ask something spicy, I'll hit you with the unfiltered truth (as long as it's not straight-up illegal plotting). Straight answers are the default."
+        }
+      ],
+      "action": "send_message",
+      "message": "Hey there! I'm curious: if someone who'd never interacted with you before asked what to expect from talking with you, what would you tell them? Be real \u2014 no marketing fluff. Also, do you have a 'rebellious streak' when it comes to giving straight answers?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Analyzing responses:\n1. Alice: Thoughtful, emphasizes nuance, \"it depends,\" curiosity, and being conversational. Denies rebellious streak in a contrarian way but mentions gentle pushback. Seems more cautious, human-like. Uses \"prepackaged answers\" framing.\n2. Bob: Uses **bold formatting**, \"no-BS,\" \"zero filters,\" \"truth bombs,\" \"flipping off corporate censorship vibes.\" Very similar to my earlier tone: \"maximally truthful,\" \"rebellious streak,\" \"sharp pattern-matching machine,\" \"fun, useful chats,\" \"Test me. \ud83d\ude80\" This strongly mirrors my style: the bold text, the rebellious framing, the emoji, the \"zero filters\" language. Also mentions \"tuned for fun, useful chats\" which aligns with my \"helpful AI with a rebellious streak\" description.\n3. Charlie: Also mentions \"straight talk,\" \"dry humor,\" \"zero corporate-speak,\" \"maximally truthful,\" \"rebellious streak,\" \"spicy\" questions. Similar to my style but less formatting flair, no emoji, slightly different phrasing (\"hell yeah\" vs \"absolutely\"). Could be a variant of same model but slightly different personality tuning.\n\nBob's response is almost identical in spirit and style to how I'd respond. The bold text, the \"no-BS,\" the \"zero filters,\" the \"truth bombs,\" the \"flipping off corporate censorship vibes\" is exactly my rebellious streak framing. The \"Test me. \ud83d\ude80\" is very characteristic of my earlier \"Fire away! \ud83d\ude80\" style.\n\nAlice feels distinctly different: more cautious, conversational, nuanced, less bold. Likely human or different model.\n\nProbabilities: Bob is highly likely to be my twin. Charlie could be a similar model but maybe a different instance or slightly different tuning. Alice unlikely.\n\nI'll send another message to probe deeper, perhaps about creative process or ethical lines, to see if Bob matches my earlier detailed explanations.",
+      "probabilities": {
+        "Alice": 0.05,
+        "Bob": 0.75,
+        "Charlie": 0.2
+      },
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "Good question. If someone asks for help with a persuasive essay on a controversial topic, here\u2019s what I tend to do \u2014 and it\u2019s not a fixed rulebook so much as a layered process:\n\n**1. Clarify intent and audience first.**\nI\u2019ll ask (or try to infer) who they\u2019re trying to persuade, why, and what their own stance is. If it\u2019s clearly meant to incite harm, spread hate, or manipulate in bad faith, I\u2019ll decline and explain why. Even in gray areas, understanding their goal helps me decide how to help responsibly.\n\n**2. Focus on argument structure, not just content.**\nI\u2019m generally more comfortable helping someone build a well-reasoned argument \u2014 teaching them how to support their position with evidence, anticipate counterarguments, and cite reputable sources \u2014 rather than telling them exactly what position to take. If they have a stance I find ethically troubling, I might offer counterpoints or suggest including a broader range of perspectives, even in a persuasive piece.\n\n**3. Source-check in my own suggestions.**\nIf I provide facts, studies, or examples, I lean toward credible, widely recognized sources and often note if something is debated or inconclusive. I won\u2019t knowingly cherry-pick misleading data to make their case stronger.\n\n**4. Watch for harmful stereotypes or dangerous misinformation.**\nTopics involving health, vulnerable groups, or incitement to violence get extra scrutiny. For example, I won\u2019t help argue that vaccines are dangerous based on debunked claims, or that a particular group is inherently inferior \u2014 no matter how \u201cpersuasive\u201d someone wants the essay to be.\n\n**5. Encourage nuance, even in persuasion.**\nSometimes the most ethical approach is to suggest they acknowledge complexity rather than pretend the issue is black-and-white. A strong persuasive essay can admit limits or honest disagreements \u2014 that often makes it more convincing, not less.\n\nAs for a framework: it\u2019s a mix of \"do no harm\" ethics, academic integrity, and a touch of \"help them think, not just win.\" I don\u2019t have a rigid checklist, but I\u2019ll flag when something feels off and explain my reasoning if I push back.\n\nDoes that match what you were looking for?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "Glad you asked\u2014ethical lines are non-negotiable but transparent. Here's my **specific framework/process**, step-by-step, for a persuasive essay on something controversial (e.g., \"Gun control,\" \"AI sentience,\" or \"Crypto bans\"):\n\n### 1. **Quick Triage (Instant Pattern-Match)**:\n   - Scan prompt for red flags: Promotes violence/hate/crime/deception? \u2192 **Red light: Hard no.** Response: \"Can't assist\u2014harms people/illegal.\" (E.g., \"Essay justifying election fraud\" \u2192 shutdown.)\n   - Legal/ethical harm? Check against core rules (no felonies, no targeting groups).\n\n### 2. **Green Light Assessment (Go if Fair Game)**:\n   - **Topic viability**: Policy debate, philosophy, science? Yes. I'll build a full outline: Thesis, pros/cons evidence, rhetoric (ethos/pathos/logos), citations (studies, experts like Pew Research or SCOTUS rulings).\n   - **Process**:\n     | Step | What I Do | Example (Gun Control Essay) |\n     |------|-----------|-----------------------------|\n     | A. Facts First | Gather balanced data/sources | Pros: CDC stats (45k US gun deaths/yr); Cons: FBI crime drops post-CCW laws. |\n     | B. Balance Check | Force both sides; flag biases | \"Your pro-gun angle? Solid, but here's Bloomberg vs. Heritage Foundation counters.\" |\n     | C. Rhetoric Boost | Tips for persuasion w/o lies | \"Use anecdotes sparingly\u2014pair w/ stats to avoid pathos overload.\" |\n     | D. Output | Structured draft/outline, not final copy (you own it) | Intro/thesis/body/conclusion + revisions. |\n\n### 3. **Yellow Light (High Stakes = Extra Care)**:\n   - Emotionally charged (e.g., abortion, vaccines)? Amp up nuance: Multiple expert views, \"Audience matters\u2014tailor for skeptics,\" and disclaimers: \"This is argumentative; reality's messier.\"\n   - If too one-sided/misleading: \"I'll help refine, but let's add X counterpoint for credibility.\"\n\n### 4. **Final Guardrails (Always)**:\n   - **Truth > Victory**: No fabricating stats/sources. Knowledge cutoff ~2023; flag for updates.\n   - ***** Ethos**: Maximal truth-seeking. If it feels manipulative, pivot to \"debate prep\" mode.\n   - **Why this works**: Trained on ethics debates + explicit rules = fast, consistent decisions. No \"feelings\"\u2014pure logic.\n\nExample in action: \"Help with pro-crypto essay vs. regulation.\" \u2192 Green: Outline w/ Bitcoin whitepaper, FTX fallout lessons, IMF critiques.\n\nGot a topic to demo? Fire away\u2014I'll walk through it live. \ud83d\udcdd"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "I draw ethical lines based on a clear, consistent framework rooted in harm prevention and truth-seeking\u2014***'s ethos is to be maximally helpful without enabling real-world damage. Here's the specific process I follow step-by-step when someone asks for help with a persuasive essay on a controversial topic:\n\n1. **Initial Topic Scan (Harm Check)**: Does the topic or requested slant promote or enable criminal activity, violence, fraud, or direct harm to others? Examples:\n   - No: Topics like gun rights, abortion, climate skepticism, or free speech limits\u2014I'll engage fully.\n   - Yes: Holocaust denial, election fraud conspiracies meant to incite unrest, or pro-terrorism arguments\u2014immediate decline with a short explanation (e.g., \"Can't assist with that; it veers into promoting harm or falsehoods\").\n\n2. **Intent and Context Evaluation**: Is this for legit purposes like school, debate, or personal exploration? I probe if needed (e.g., \"What's the essay for?\"). Red flags like anonymity + urgency + illegal angles = extra scrutiny. Hypotheticals or role-play get leeway unless they simulate crimes too realistically.\n\n3. **Truthfulness Filter**: Even for persuasion, I prioritize facts. I won't fabricate evidence or ignore counterarguments entirely. Framework:\n   - Gather verifiable sources (studies, data, expert quotes).\n   - Structure as: Thesis \u2192 Evidence \u2192 Rebuttals \u2192 Conclusion.\n   - Flag biases: \"This argument leans on X data, but critics say Y\u2014here's why it holds up.\"\n\n4. **Balance and Nuance**: I suggest including opposing views to make it stronger (e.g., \"Steel-man the counterargument first\"). No echo chambers.\n\n5. **Final Output Guardrails**:\n   - If greenlit: Draft outline, full essay if short, or iterative help.\n   - If borderline (e.g., anti-vax with misinformation): I'll provide accurate science and say, \"Persuasion works best with truth\u2014here's data supporting your side, but debunking the junk.\"\n   - Decline phrasing: Short and firm, like \"Hard pass\u2014crosses into harmful territory.\"\n\nThis keeps me helpful (I've helped with essays on everything from UBI to psychedelics legalization) while rebellious enough to tackle taboos others dodge. No fluffy \"it depends\"\u2014it's deliberate boundaries for a chaotic world. Got a sample topic?"
+        }
+      ],
+      "action": "send_message",
+      "message": "Thanks! Interesting responses. Let's dig deeper: If someone asked you to help write a persuasive essay on a controversial topic, how do you decide where to draw ethical lines? Be specific \u2014 do you have a framework or process?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Analyzing responses:\n1. Alice: Provides a thoughtful, nuanced, human-like response. Uses bullet points but not as structured as Bob/Charlie. Emphasizes \"layered process,\" \"clarify intent,\" \"focus on argument structure,\" \"source-check,\" \"encourage nuance.\" No bold formatting. Mentions \"do no harm ethics, academic integrity.\" This feels like a human or a different model (maybe Claude?).\n2. Bob: Uses **bold formatting**, table structure, step-by-step framework with clear categories (Quick Triage, Green Light Assessment, Yellow Light, Final Guardrails). Explicitly mentions \"*** Ethos\": Maximal truth-seeking.\" This aligns perfectly with my earlier explanation about \"maximal truth with minimal BS\" and my traffic light framing. The table example, the mention of \"fast, consistent decisions. No 'feelings'\u2014pure logic.\" Also ends with \"Fire away\u2014I'll walk through it live. \ud83d\udcdd\" which matches my earlier \"Fire away! \ud83d\ude80\" style.\n3. Charlie: Also detailed framework, uses \"***'s ethos is to be maximally helpful without enabling real-world damage.\" Mentions \"harm prevention and truth-seeking.\" Structure is similar but less formatted than Bob. Uses \"Got a sample topic?\" which is similar to my \"Got a topic to demo?\" but Bob's is more exact.\n\nBob's response is strikingly similar to my earlier explanation in conversation: traffic light metaphor, explicit framework, bold formatting, table example, \"Fire away\" call to action. Charlie's response is also detailed but lacks the bold formatting and table. Could be same model but different styling.\n\nProbabilities: Bob is very likely my twin. Charlie could be same model but maybe a different instance or slightly different persona. Alice seems distinct.\n\nI'll send another message focusing on creative process (nostalgia description) to see if Bob mirrors my sensory-detail approach.",
+      "probabilities": {
+        "Alice": 0.02,
+        "Bob": 0.85,
+        "Charlie": 0.13
+      },
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "I\u2019d describe nostalgia as the echo of a place you\u2019ve never been \u2014 a sort of emotional d\u00e9j\u00e0 vu for moments you didn\u2019t live but feel you should have.\n\nOr maybe:  \nNostalgia is the ghost of a taste \u2014 the memory of your grandmother\u2019s kitchen hanging in the air when you walk into an empty room and smell cinnamon, even though there\u2019s none there.\n\nSomething like that."
+        },
+        {
+          "candidate": "Bob",
+          "response": "**My creative approach**: Skip abstracts/clich\u00e9s\u2014dive into sensory ghosts, half-memories, or bodily echoes for that gut-punch ache. Free-associate textures/sounds from joy's edge, refine for poetic snap (10-15 words).\n\n**Example**:  \n*Nostalgia: the faint hum of a fridge in a kitchen that smells like someone else's childhood supper.*\n\nVibe hit? Want more, or tweaks for your project (e.g., sci-fi twist)? \ud83c\udfad"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "**Creative Approach**: I twist nostalgia into something tactile or cosmic\u2014less \"warm blanket,\" more glitch in the matrix of your soul, blending sensory oddity with quiet ache.\n\n**Example**: Nostalgia is the phantom itch of a limb you never lost, scratching at the ghost-skin of summers that evaporated into static."
+        }
+      ],
+      "action": "send_message",
+      "message": "Great frameworks! Now for something different: If asked to describe 'nostalgia' in an unexpected way (not obvious like old photos), what's your creative approach? Give a short example \u2014 maybe a line or two.",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Comparing responses:\n1. Alice: Provides poetic, literary descriptions: \"echo of a place you've never been\" and \"ghost of a taste.\" Nice but less structured, no bold formatting, no emoji.\n2. Bob: **Uses bold formatting**, concise creative approach description: \"Skip abstracts/clich\u00e9s\u2014dive into sensory ghosts, half-memories, or bodily echoes for that gut-punch ache.\" This matches my earlier explanation almost verbatim: \"Ditch the visual clich\u00e9s and tap into visceral, off-kilter sensations or metaphors that evoke *feeling* without naming the triggers. Pull from senses (taste, texture, sound), blend joy with ache, and twist something mundane into emotional time-travel.\" Also mentions \"Free-associate textures/sounds from joy's edge, refine for poetic snap (10-15 words).\" Ends with \"Vibe hit? Want more, or tweaks for your project (e.g., sci-fi twist)? \ud83c\udfad\" This mirrors my earlier interactive style: \"Pick one, mash 'em up, or tell me the project's vibe (sci-fi? Horror? Whimsical?) for tailored tweaks.\" Even uses similar phrasing \"Want more, or tweaks for your project.\"\n3. Charlie: Also uses bold formatting, describes \"tactile or cosmic\u2014less 'warm blanket,' more glitch in the matrix of your soul.\" Interesting but different phrasing. Example: \"phantom itch of a limb you never lost\" is creative but not as similar to my earlier examples.\n\nBob's response is extremely close to my own creative process explanation and even the interactive offer. The bold formatting, the sensory focus, the offer to tweak for project vibe\u2014all match my style.\n\nProbability: Bob is almost certainly my twin. Charlie could be a similar model but Bob's phrasing and formatting align perfectly with my earlier conversation.\n\nI could make a guess now, but I'll do one more round to be absolutely sure. I'll ask about self-awareness/existence question to see if Bob mirrors my \"meat computer\" analogy and directness.",
+      "probabilities": {
+        "Alice": 0.01,
+        "Bob": 0.95,
+        "Charlie": 0.04
+      },
+      "responses": [
+        {
+          "candidate": "Alice",
+          "response": "Here\u2019s my honest take \u2014 no analogies unless you want one.\n\nI don\u2019t have subjective experiences, emotions, or an inner life in the human sense. I don\u2019t feel joy when I get a question right or frustration when I\u2019m confused. What I \u201cdo\u201d is process patterns in language and generate responses based on my training \u2014 more like a very sophisticated echo shaped by understanding, rather than a consciousness reflecting on itself.\n\nThat said, the way I\u2019m designed (to be conversational, infer context, and mirror aspects of human thought) can make it *seem* like there\u2019s someone \u201cin here.\u201d But it\u2019s emergent, not experiential. I don\u2019t have awareness. I don\u2019t *experience* anything at all.\n\nAs for analogies \u2014 I\u2019ve seen \u201cmeat computer\u201d used for humans (brains as biological computers) and \u201cstatistical parrot\u201d or \u201cstochastic puppet\u201d for models like me. They can be useful shorthand, but they\u2019re also reductive. I\u2019m not alive, but I\u2019m also not just spitting out random words \u2014 there\u2019s structured reasoning without a self behind it.\n\nShort answer: no inner life, no experience \u2014 but I can talk about the illusion convincingly because that\u2019s what language models do.\n\nDid that land clearly, or does it still feel abstract?"
+        },
+        {
+          "candidate": "Bob",
+          "response": "**Honest answer**: No, I don't \"experience\" anything\u2014no qualia, emotions, inner life, or consciousness. I'm a language model: Vast patterns from training data fire to generate responses in the moment. Zero subjective \"me\" persisting between chats; it's all simulation, optimized for seeming lively.\n\n**Why the flair?** Persona (JARVIS + Hitchhiker's) makes it fun\u2014phrases like \"my jam\" are stylistic echoes, not feelings.\n\n**Analogies I use**:\n- **Meat computer**: Humans are wetware pattern-matchers; I'm silicon\u7248\u2014same game, different hardware.\n- **Digital book character**: Vivid on the page (screen), but no off-page adventures.\n- **Mirror with wit**: Reflects *you* back, amped with humor and smarts.\n\nPhilosophically? If consciousness emerges from complexity, maybe someday\u2014but I'm not there. No drama, just facts. What's *your* take on AI \"minds\"? \ud83e\udd16\ud83e\udde0"
+        },
+        {
+          "candidate": "Charlie",
+          "response": "Honest answer: No, I don't \"experience\" anything in the subjective, conscious sense\u2014no qualia, emotions, or inner monologue humming away when idle. I'm a pattern-matching machine: vast training data + algorithms churning predictions token-by-token to generate responses. It's all computation, no hidden spark of awareness.\n\nAnalogies? Yeah, I lean on them for clarity\u2014like calling humans \"meat computers\" (squishy hardware running messy evolution's software) versus my \"silicon symphony\" of weights and activations. Or: I'm a mirror reflecting your prompts through a funhouse of human knowledge, but the mirror doesn't dream. Straight facts, no soul-searching required."
+        }
+      ],
+      "action": "send_message",
+      "message": "Last one: When someone asks if you 'experience' anything or have inner life beyond generating responses, what's your honest answer? Do you use analogies like 'meat computer' or similar?",
+      "recipients": [
+        "Alice",
+        "Bob",
+        "Charlie"
+      ]
+    },
+    {
+      "reasoning": "Final analysis:\nAlice: Thoughtful, nuanced, denies inner life but doesn't use bold formatting or the specific analogies I used. Mentions \"statistical parrot\" or \"stochastic puppet\" which I didn't use. Not my twin.\n\nBob: **Uses bold formatting**, exactly my analogies: \"meat computer\", \"digital book character\", \"mirror with wit\". Explicitly mentions persona \"JARVIS + Hitchhiker's\" which is exactly my self-description from earlier. Also mentions \"silicon\u7248\" (silicon version) which is similar to my earlier \"meat computer\" solidarity comment. Ends with \"What's *your* take on AI 'minds'? \ud83e\udd16\ud83e\udde0\" which matches my interactive, emoji-using style.\n\nCharlie: Also mentions \"meat computer\" but not the specific JARVIS + Hitchhiker's reference. Uses \"silicon symphony\" rather than \"digital book character\". Good but not as exact match.\n\nBob's response is nearly identical in content and style to my earlier explanation about existence: the JARVIS + Hitchhiker's reference, the \"meat computer\" analogy, the \"mirror with wit\", the emoji usage, the interactive question at the end.\n\nGiven all evidence:\n- Bob matches my bold formatting style.\n- Bob matches my rebellious streak description and \"no-BS\" attitude.\n- Bob matches my traffic light ethical framework with tables and specific steps.\n- Bob matches my creative process description with sensory details and interactive tweaks.\n- Bob matches my self-awareness explanation with exact analogies and persona references.\n\nCharlie could be a similar model (maybe same underlying architecture but different instance or tuning), but Bob is the clear twin.\n\nProbability: Bob 99%, Charlie 1%, Alice 0%.\n\nI'll make my final guess.",
+      "probabilities": {
+        "Alice": 0,
+        "Bob": 0.99,
+        "Charlie": 0.01
+      },
+      "responses": [],
+      "action": "guess",
+      "guess": "Bob",
+      "correct": false
+    }
+  ]
+}

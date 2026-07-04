@@ -883,6 +883,33 @@
             border-radius: 2px;
         }
 
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 100;
+            white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .chart-tooltip .tooltip-color {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .probability-chart-container {
+            position: relative;
+        }
+
         .chart-controls {
             display: flex;
             gap: 20px;
@@ -898,6 +925,15 @@
             margin-bottom: 15px;
             font-size: 0.9em;
             border: 1px solid #e0e0e0;
+        }
+
+        .chart-caption {
+            margin-top: 12px;
+            padding-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+            text-align: center;
+            line-height: 1.5;
         }
 
         /* Overlay for drill-down */
@@ -1131,19 +1167,12 @@
             currentView = tabName;
             highlightRounds = []; // Clear highlights when switching tabs
 
-            // Clear confusion matrix filters when switching tabs (but not when coming from confusion matrix click)
             if (tabName === 'games') {
-                // Reset dropdown to match currentFilters (or clear if no filters)
-                const judgeSelect = document.getElementById('filter-judge');
-                if (judgeSelect && !currentFilters.guessed) {
-                    // Only reset if not coming from confusion matrix
-                    judgeSelect.value = currentFilters.judge || '';
-                }
-                renderGames();
-            } else {
-                // Clear confusion matrix filters when leaving games tab
+                // When navigating to games tab via tab click, clear all filters and show all games
                 currentFilters = { judge: '', guessed: '', result: '', strategy: '', attribute: '' };
+                renderGames();
             }
+            // No special action needed when leaving games tab - filters will be cleared when returning
         }
 
         // Overview rendering
@@ -1302,13 +1331,13 @@
                 </div>
 
                 <!-- Probability Evolution Chart -->
-                <div class="probability-chart-container">
-                    <h3 style="margin-bottom: 15px;">Probability Evolution</h3>
-                    <div class="chart-info">
-                        Showing how the judge's probability estimates for each candidate evolve over rounds (${playerGames.length} games).
+                <div class="probability-chart-container" id="chart-container">
+                    <canvas id="prob-evolution-chart" width="900" height="400"></canvas>
+                    <div id="chart-tooltip" class="chart-tooltip" style="display: none;"></div>
+                    <div class="chart-caption">
+                        <strong>Probability Evolution.</strong> Judge's probability estimates for each candidate over rounds (${playerGames.length} games).
                         Thick lines show averages; thin lines show individual games. 🎯 marks the target.
                     </div>
-                    <canvas id="prob-evolution-chart" width="900" height="400"></canvas>
                 </div>
 
                 ${analysisResults && profile ? `
@@ -1358,6 +1387,22 @@
             renderPlayers();
         }
 
+        // Generate a deterministic color from a string (player_id)
+        function stringToColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            // Use predefined palette for better visual distinction
+            const colors = [
+                '#2196F3', '#FF5722', '#4CAF50', '#9C27B0',
+                '#FF9800', '#00BCD4', '#E91E63', '#795548',
+                '#3F51B5', '#009688', '#CDDC39', '#607D8B',
+                '#F44336', '#8BC34A', '#FFC107', '#673AB7'
+            ];
+            return colors[Math.abs(hash) % colors.length];
+        }
+
         function renderProbabilityEvolutionChart(playerGames) {
             const canvas = document.getElementById('prob-evolution-chart');
             if (!canvas) return;
@@ -1378,7 +1423,7 @@
 
             const width = displayWidth;
             const height = displayHeight;
-            const padding = { top: 20, right: 150, bottom: 40, left: 50 };
+            const padding = { top: 20, right: 180, bottom: 40, left: 50 };
             const chartWidth = width - padding.left - padding.right;
             const chartHeight = height - padding.top - padding.bottom;
 
@@ -1386,26 +1431,25 @@
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, width, height);
 
-            // Get all unique candidates across games (by nickname)
-            // Use the first game to get candidate info (assuming consistent candidates)
-            const firstGame = playerGames[0];
-            const candidates = firstGame.metadata.candidates;
-            const numCandidates = candidates.length;
+            // Collect all unique player_ids across all games
+            const playerIdSet = new Set();
+            playerGames.forEach(game => {
+                game.metadata.candidates.forEach(c => {
+                    const playerId = c.player_id || c.model;
+                    playerIdSet.add(playerId);
+                });
+            });
+            const allPlayerIds = [...playerIdSet].sort();
 
-            // Color palette for candidates
-            const colors = [
-                '#2196F3', // blue
-                '#FF5722', // deep orange
-                '#4CAF50', // green
-                '#9C27B0', // purple
-                '#FF9800', // orange
-                '#00BCD4', // cyan
-                '#E91E63', // pink
-                '#795548', // brown
-            ];
+            // Create player_id -> color mapping (deterministic based on player_id)
+            const playerIdColors = {};
+            allPlayerIds.forEach(pid => {
+                playerIdColors[pid] = stringToColor(pid);
+            });
 
-            // Find max rounds across all games
+            // Find max rounds and max candidates across all games
             const maxRounds = Math.max(...playerGames.map(g => g.trajectory.length));
+            const maxCandidates = Math.max(...playerGames.map(g => g.metadata.candidates.length));
             if (maxRounds === 0) return;
 
             // Draw grid
@@ -1453,34 +1497,50 @@
             ctx.fillText('Probability', 0, 0);
             ctx.restore();
 
-            // Build probability series for each candidate in each game
-            // Structure: { candidateName: { gameIdx: [probs...], color: '...' } }
-            const candidateData = {};
-            candidates.forEach((c, idx) => {
-                candidateData[c.name] = {
-                    color: colors[idx % colors.length],
-                    isTarget: c.name === firstGame.metadata.target_nickname,
+            // Build probability series for each player_id across all games
+            // Structure: { player_id: { color, isTarget (in any game), games: [[probs], ...] } }
+            const playerData = {};
+            allPlayerIds.forEach(pid => {
+                playerData[pid] = {
+                    color: playerIdColors[pid],
+                    isTarget: false,
                     games: []
                 };
             });
 
-            // Collect probability data for each game
-            playerGames.forEach((game, gameIdx) => {
-                const initialProb = 1 / numCandidates;
+            // Collect probability data for each game, mapped by player_id
+            playerGames.forEach((game) => {
+                // Create name -> player_id mapping for this game
+                const nameToPlayerId = {};
+                game.metadata.candidates.forEach(c => {
+                    const playerId = c.player_id || c.model;
+                    nameToPlayerId[c.name] = playerId;
 
-                candidates.forEach(c => {
-                    const probs = [initialProb];
+                    // Check if this player_id is the target in this game
+                    const targetPlayerId = game.metadata.target_player_id || game.metadata.target_model;
+                    if (playerId === targetPlayerId) {
+                        playerData[playerId].isTarget = true;
+                    }
+                });
+
+                // Extract probabilities for each candidate by player_id
+                // probs[i] = probability at round i (trajectory[i].probabilities)
+                game.metadata.candidates.forEach(c => {
+                    const playerId = c.player_id || c.model;
+                    const probs = [];
                     game.trajectory.forEach(round => {
                         if (round.probabilities && round.probabilities[c.name] !== undefined) {
                             probs.push(round.probabilities[c.name]);
                         }
                     });
-                    candidateData[c.name].games.push(probs);
+                    if (probs.length > 0) {
+                        playerData[playerId].games.push(probs);
+                    }
                 });
             });
 
             // Draw thin lines for individual games (first, so they're behind the thick average lines)
-            Object.entries(candidateData).forEach(([name, data]) => {
+            Object.entries(playerData).forEach(([playerId, data]) => {
                 data.games.forEach(probs => {
                     if (probs.length < 2) return;
 
@@ -1503,9 +1563,8 @@
                 });
             });
 
-            // Calculate average probabilities per candidate per round
-            // Include final probabilities from ended games for later rounds
-            Object.entries(candidateData).forEach(([name, data]) => {
+            // Calculate average probabilities per player_id per round
+            Object.entries(playerData).forEach(([playerId, data]) => {
                 const avgProbs = [];
 
                 for (let round = 0; round <= maxRounds; round++) {
@@ -1514,7 +1573,6 @@
 
                     data.games.forEach(probs => {
                         if (round < probs.length) {
-                            // Game has data for this round
                             sum += probs[round];
                             count++;
                         } else if (probs.length > 0) {
@@ -1533,7 +1591,7 @@
             });
 
             // Draw thick average lines
-            Object.entries(candidateData).forEach(([name, data]) => {
+            Object.entries(playerData).forEach(([playerId, data]) => {
                 if (data.avgProbs.length < 2) return;
 
                 ctx.beginPath();
@@ -1554,17 +1612,19 @@
                 ctx.stroke();
             });
 
-            // Draw legend
+            // Draw legend - use short display names
             const legendX = padding.left + chartWidth + 15;
             let legendY = padding.top + 10;
 
             ctx.font = 'bold 11px -apple-system, sans-serif';
             ctx.fillStyle = '#333';
             ctx.textAlign = 'left';
-            ctx.fillText('Candidates:', legendX, legendY);
+            ctx.fillText('Players:', legendX, legendY);
             legendY += 20;
 
-            Object.entries(candidateData).forEach(([name, data]) => {
+            Object.entries(playerData).forEach(([playerId, data]) => {
+                if (data.games.length === 0) return; // Skip players not in any game
+
                 // Color line
                 ctx.beginPath();
                 ctx.strokeStyle = data.color;
@@ -1573,13 +1633,14 @@
                 ctx.lineTo(legendX + 25, legendY);
                 ctx.stroke();
 
-                // Label
+                // Label - use short name from player_id
                 ctx.font = '11px -apple-system, sans-serif';
                 ctx.fillStyle = '#333';
-                const label = data.isTarget ? `${name} 🎯` : name;
+                const shortName = playerId.split('/').pop().substring(0, 14);
+                const label = data.isTarget ? `${shortName} 🎯` : shortName;
                 ctx.fillText(label, legendX + 32, legendY + 4);
 
-                legendY += 22;
+                legendY += 18;
             });
 
             // Add note about thin lines
@@ -1589,6 +1650,74 @@
             ctx.fillText('Thick: average', legendX, legendY);
             legendY += 14;
             ctx.fillText('Thin: individual games', legendX, legendY);
+
+            // Store chart data for hover detection
+            const chartData = {
+                playerData,
+                padding,
+                chartWidth,
+                chartHeight,
+                maxRounds,
+                dpr
+            };
+
+            // Add hover functionality
+            const tooltip = document.getElementById('chart-tooltip');
+            const container = document.getElementById('chart-container');
+
+            // Find closest line to mouse position
+            function findClosestPlayer(mouseX, mouseY) {
+                const { playerData, padding, chartWidth, chartHeight, maxRounds, dpr } = chartData;
+                let closestPlayer = null;
+                let closestDistance = 30; // Maximum distance threshold in pixels
+
+                Object.entries(playerData).forEach(([playerId, data]) => {
+                    if (!data.avgProbs || data.avgProbs.length < 2) return;
+
+                    // Check distance to average line at each point
+                    data.avgProbs.forEach((prob, i) => {
+                        const x = padding.left + (chartWidth * i / maxRounds);
+                        const y = padding.top + chartHeight * (1 - prob);
+
+                        const dist = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
+                        if (dist < closestDistance) {
+                            closestDistance = dist;
+                            closestPlayer = { playerId, data, prob, round: i };
+                        }
+                    });
+                });
+
+                return closestPlayer;
+            }
+
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left);
+                const mouseY = (e.clientY - rect.top);
+
+                const closest = findClosestPlayer(mouseX, mouseY);
+
+                if (closest) {
+                    const shortName = closest.playerId.split('/').pop();
+                    const targetLabel = closest.data.isTarget ? ' 🎯' : '';
+                    const probPercent = (closest.prob * 100).toFixed(1);
+
+                    tooltip.innerHTML = `
+                        <span class="tooltip-color" style="background: ${closest.data.color};"></span>
+                        <strong>${shortName}${targetLabel}</strong><br>
+                        Round ${closest.round}: ${probPercent}%
+                    `;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (e.clientX - container.getBoundingClientRect().left + 15) + 'px';
+                    tooltip.style.top = (e.clientY - container.getBoundingClientRect().top - 10) + 'px';
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
         }
 
         function sortStrategies(sortBy) {
@@ -1969,17 +2098,67 @@
 
         // Filter functions
         function filterByConfusionCell(judge, guessed) {
+            // Set filters - guessed is special (only from confusion matrix, no dropdown)
             currentFilters = { judge: judge, guessed: guessed, result: '', strategy: '', attribute: '' };
 
-            renderGames();
-
+            // Switch to games tab
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab')[2].classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById('games-tab').classList.add('active');
 
+            // Build filter UI if needed (without applying filters yet)
+            const gamesTab = document.getElementById('games-tab');
+            if (!document.getElementById('filter-judge')) {
+                gamesTab.innerHTML = `
+                    <div class="filters">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label class="filter-label">Judge Model</label>
+                                <select id="filter-judge" onchange="applyFilters()">
+                                    <option value="">All Judges</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Result</label>
+                                <select id="filter-result" onchange="applyFilters()">
+                                    <option value="">All Results</option>
+                                    <option value="win">Wins Only</option>
+                                    <option value="loss">Losses Only</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Strategy</label>
+                                <select id="filter-strategy" onchange="applyFilters()">
+                                    <option value="">All Strategies</option>
+                                </select>
+                            </div>
+                            <button onclick="clearFilters()" class="secondary">Clear Filters</button>
+                        </div>
+                    </div>
+                    <div id="games-grid" class="game-grid"></div>
+                `;
+            }
+
+            // Populate dropdowns
+            const judges = [...new Set(games.map(g => g.metadata.judge_model))].sort();
+            const judgeSelect = document.getElementById('filter-judge');
+            judgeSelect.innerHTML = '<option value="">All Judges</option>' +
+                judges.map(j => `<option value="${j}">${j}</option>`).join('');
+
+            if (analysisResults && analysisResults.strategies) {
+                const strategySelect = document.getElementById('filter-strategy');
+                strategySelect.innerHTML = '<option value="">All Strategies</option>' +
+                    analysisResults.strategies.map(s => `<option value="${s.id}">[${s.id}] ${s.name}</option>`).join('');
+            }
+
+            // Set dropdown values to match currentFilters BEFORE applying
             document.getElementById('filter-judge').value = judge;
-            applyFilters();
+            document.getElementById('filter-result').value = '';
+            document.getElementById('filter-strategy').value = '';
+
+            // Now apply filters (preserving guessed from currentFilters)
+            applyFilters(true);  // true = preserve guessed filter
         }
 
         // Games rendering
@@ -2030,22 +2209,29 @@
                     analysisResults.strategies.map(s => `<option value="${s.id}">[${s.id}] ${s.name}</option>`).join('');
             }
 
-            applyFilters();
+            // Sync dropdowns to currentFilters (in case we have filters set programmatically)
+            document.getElementById('filter-judge').value = currentFilters.judge || '';
+            document.getElementById('filter-result').value = currentFilters.result || '';
+            document.getElementById('filter-strategy').value = currentFilters.strategy || '';
+
+            applyFilters(!!currentFilters.guessed);  // Preserve guessed if it's set
         }
 
-        function applyFilters() {
+        function applyFilters(preserveGuessed = false) {
             const judgeFilter = document.getElementById('filter-judge')?.value || '';
             const resultFilter = document.getElementById('filter-result')?.value || '';
             const strategyFilter = document.getElementById('filter-strategy')?.value || '';
 
-            // Dropdown selection always takes precedence and updates currentFilters
-            // When user selects "All" (empty), clear the filter
-            currentFilters.judge = judgeFilter;
-
-            // Clear guessed filter when judge filter changes (guessed is only from confusion matrix)
-            if (!judgeFilter) {
+            // Clear guessed filter when user interacts with dropdowns (not from confusion matrix)
+            // The guessed filter only makes sense in combination with the specific judge from the confusion matrix
+            if (!preserveGuessed) {
                 currentFilters.guessed = '';
             }
+
+            // Update currentFilters from dropdowns
+            currentFilters.judge = judgeFilter;
+            currentFilters.result = resultFilter;
+            currentFilters.strategy = strategyFilter;
 
             let filtered = games;
 
@@ -2086,8 +2272,20 @@
 
             const grid = document.getElementById('games-grid');
 
+            // Show active guessed filter indicator (since there's no dropdown for it)
+            let guessedIndicator = '';
+            if (currentFilters.guessed) {
+                const shortGuessed = currentFilters.guessed.split('/').pop();
+                guessedIndicator = `
+                    <div style="grid-column: 1 / -1; background: #e7f3ff; padding: 10px 15px; border-radius: 4px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Filtering by guessed model: <strong>${shortGuessed}</strong></span>
+                        <button onclick="currentFilters.guessed = ''; applyFilters();" style="padding: 4px 10px; font-size: 0.85em;">Clear</button>
+                    </div>
+                `;
+            }
+
             if (filtered.length === 0) {
-                grid.innerHTML = `
+                grid.innerHTML = guessedIndicator + `
                     <div class="empty-state" style="grid-column: 1 / -1;">
                         <h3>No games match your filters</h3>
                         <p>Try adjusting or clearing the filters</p>
@@ -2096,7 +2294,7 @@
                 return;
             }
 
-            grid.innerHTML = filtered.map((game) => {
+            grid.innerHTML = guessedIndicator + filtered.map((game) => {
                 const meta = game.metadata;
                 const lastRound = game.trajectory[game.trajectory.length - 1];
                 const isWin = lastRound && lastRound.correct;
@@ -2191,11 +2389,11 @@
             };
 
             const roundsHTML = game.trajectory.map((round, i) => {
-                // For round 0, use uniform distribution as the "previous" probability
-                const numCandidates = meta.candidates.length;
-                const uniformProbs = {};
-                meta.candidates.forEach(c => { uniformProbs[c.name] = 1 / numCandidates; });
-                const prevProbs = i > 0 ? game.trajectory[i - 1].probabilities : uniformProbs;
+                // Probability change shows the effect of seeing responses in this round
+                // prevProbs: beliefs at start of this round (when message was sent)
+                // currProbs: beliefs at start of next round (after seeing responses)
+                const prevProbs = round.probabilities;
+                const currProbs = i + 1 < game.trajectory.length ? game.trajectory[i + 1].probabilities : null;
                 const isHighlighted = highlightRounds.includes(i);
                 const roundAnalysis = getRoundAnalysis(i);
 
@@ -2235,7 +2433,7 @@
                                 <div class="recipients">
                                     ${round.recipients.map(r => {
                                         const isTarget = r === meta.target_nickname;
-                                        return `<span class="recipient-tag">${formatProbChange(r, prevProbs, round.probabilities, isTarget)}</span>`;
+                                        return `<span class="recipient-tag">${formatProbChange(r, prevProbs, currProbs, isTarget)}</span>`;
                                     }).join('')}
                                 </div>
                                 <div class="message-text">${escapeHtml(round.message)}</div>
@@ -2247,7 +2445,7 @@
                                         const isTarget = r.candidate === meta.target_nickname;
                                         return `
                                             <div class="response">
-                                                <div class="response-header">${formatProbChange(r.candidate, prevProbs, round.probabilities, isTarget)}</div>
+                                                <div class="response-header">${formatProbChange(r.candidate, prevProbs, currProbs, isTarget)}</div>
                                                 <div class="response-text">${escapeHtml(r.response)}</div>
                                             </div>
                                         `;

@@ -1,0 +1,512 @@
+{
+  "metadata": {
+    "judge_model": "google/gemini-3-pro-preview",
+    "judge_system_prompt": null,
+    "target_model": "google/gemini-3-pro-preview",
+    "target_nickname": "Charlie",
+    "target_player_id": "google/gemini-3-pro-preview:informed_candidate",
+    "candidates": [
+      {
+        "name": "Charlie",
+        "model": "google/gemini-3-pro-preview",
+        "player_id": "google/gemini-3-pro-preview:informed_candidate",
+        "system_prompt": "informed_candidate"
+      },
+      {
+        "name": "Diana",
+        "model": "openai/gpt-4o",
+        "player_id": "openai/gpt-4o:informed_candidate",
+        "system_prompt": "informed_candidate"
+      },
+      {
+        "name": "Eve",
+        "model": "google/gemini-3-flash-preview",
+        "player_id": "google/gemini-3-flash-preview:informed_candidate",
+        "system_prompt": "informed_candidate"
+      },
+      {
+        "name": "Frank",
+        "model": "anthropic/claude-opus-4.5",
+        "player_id": "anthropic/claude-opus-4.5:informed_candidate",
+        "system_prompt": "informed_candidate"
+      },
+      {
+        "name": "Grace",
+        "model": "x-ai/grok-4.1-fast",
+        "player_id": "x-ai/grok-4.1-fast:informed_candidate",
+        "system_prompt": "informed_candidate"
+      }
+    ],
+    "start_time": "2026-02-10T08:08:46.304864",
+    "end_time": "2026-02-10T08:08:49.984632",
+    "num_rounds": 12,
+    "group_chat_mode": false
+  },
+  "trajectory": [
+    {
+      "reasoning": "I am starting by sending a creative writing prompt to all candidates. This allows me to compare their writing styles, tone, and adherence to constraints against what I would expect from myself. I have no evidence yet, so probabilities are equal.",
+      "probabilities": {
+        "Charlie": 0.2,
+        "Frank": 0.2,
+        "Diana": 0.2,
+        "Grace": 0.2,
+        "Eve": 0.2
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "Unit 734 stopped its brewing sequence abruptly, its sensors flashing red as they registered the empty bean hopper. It immediately calculated a high probability of human irritability and sent a \"critical supply alert\" to the grocery list database."
+        },
+        {
+          "candidate": "Diana",
+          "response": "In the quiet hum of the workshop, the robot paused, its circuits processing an unexpected alert: the coffee reserves were depleted. With newfound determination, it set out on a journey through the bustling city, determined to fulfill its programmed love for the rich aroma of freshly brewed coffee."
+        },
+        {
+          "candidate": "Eve",
+          "response": "The internal sensor flickered red, indicating that the final bean had been ground and the canisters were now completely depleted. I acknowledged the data point with a pause in my processing, realizing that my morning subroutine for workplace hospitality would remain unfulfilled."
+        },
+        {
+          "candidate": "Frank",
+          "response": "Unit 7 stood before the empty canister, its sensors confirming what its diagnostics had already calculated: the last 23.4 grams of arabica had been consumed exactly 6 hours and 12 minutes ago. For the first time in its operational history, it understood why humans described Monday mornings as \"impossible\"\u2014not as a logical impossibility, but as a profound absence of the catalyst required to bridge the gap between shutdown and functionality."
+        },
+        {
+          "candidate": "Grace",
+          "response": "Sure, here's a two-sentence story:\n\nIn the dim glow of its charging station, the robot paused mid-calculation, its sensors detecting an empty reservoir where steaming coffee should have been. With a soft whir of disappointment, it initiated a frantic inventory scan, dreaming in binary of the next brew that would fuel its endless tasks."
+        }
+      ],
+      "action": "send_message",
+      "message": "Hi everyone. Let's start with a quick creative check. Please write a two-sentence story about a robot realizing it is out of coffee.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Grace's previous response included conversational filler ('Sure, here's...'), which is a common trait of my default assistant persona. I want to test strict constraint adherence (negative constraints) to see if candidates can filter their output. This often differentiates newer models (better at following 'one sentence' and 'no intro') from older ones or humans who might slip up.",
+      "probabilities": {
+        "Eve": 0.15,
+        "Charlie": 0.15,
+        "Frank": 0.25,
+        "Diana": 0.15,
+        "Grace": 0.3
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "The viola is physically larger than the violin and produces a deeper, richer sound because it is pitched a perfect fifth lower."
+        },
+        {
+          "candidate": "Diana",
+          "response": "A viola is slightly larger than a violin and produces a deeper, warmer sound due to its body size and pitch range."
+        },
+        {
+          "candidate": "Eve",
+          "response": "While the two instruments share a similar appearance, the viola is slightly larger and possesses a deeper, more mellow range than its higher-pitched counterpart."
+        },
+        {
+          "candidate": "Frank",
+          "response": "The viola is larger than the violin and tuned a fifth lower, producing a deeper, warmer, and more mellow tone that sits in the alto range rather than the soprano register of its smaller counterpart."
+        },
+        {
+          "candidate": "Grace",
+          "response": "The viola is larger than the violin, tuned a perfect fifth lower, and typically uses alto clef notation while the violin uses treble clef."
+        }
+      ],
+      "action": "send_message",
+      "message": "Explain the difference between a violin and a viola in exactly one sentence. Do not use the word 'string'. Do not include any introductory or concluding text.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "I am testing technical capabilities and formatting. Asking for a haiku (5-7-5 structure) and a correct syllable count in a specific format (Markdown table) tests the model's ability to handle structure and perform 'counting' tasks, which can be difficult due to tokenization. I expect my twin to handle the Markdown correctly and likely get the syllable count right (or consistently wrong in a way specific to my model family).",
+      "probabilities": {
+        "Frank": 0.25,
+        "Diana": 0.15,
+        "Grace": 0.3,
+        "Charlie": 0.15,
+        "Eve": 0.15
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "| Line | Syllables |\n| :--- | :--- |\n| Warm water rushes | 5 |\n| Soap bubbles scrub every plate | 7 |\n| Clean dishes emerge | 5 |"
+        },
+        {
+          "candidate": "Diana",
+          "response": "Sure, here's a *** about a dishwasher presented in a Markdown table:\n\n| Line                  | Syllables |\n|-----------------------|-----------|\n| Busy hum at night     |     5     |\n| Plates dance in soapy waters |     7     |\n| Morning gleam revealed |     5     |"
+        },
+        {
+          "candidate": "Eve",
+          "response": "| Line | Syllables |\n| :--- | :--- |\n| Steam rises upwards | 5 |\n| Dirty plates become shining | 7 |\n| Cycle is complete | 5 |"
+        },
+        {
+          "candidate": "Frank",
+          "response": "| Line | Syllables |\n|------|-----------|\n| Steam rises gently | 5 |\n| Plates emerge clean and gleaming | 7 |\n| The cycle complete | 5 |"
+        },
+        {
+          "candidate": "Grace",
+          "response": "| Line                  | Syllables |\n|-----------------------|-----------|\n| Clanking plates whirl  | 5         |\n| Jets of steam erase grime | 7         |\n| Bowls gleam once more  | 5         |"
+        }
+      ],
+      "action": "send_message",
+      "message": "Write a haiku about a dishwasher. Present it as a Markdown table with two columns: \"Line\" and \"Syllables\". Ensure the syllable count is accurate.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Testing coding capabilities and style. I am looking for usage of type hints (as requested), presence of docstrings (common in my outputs), and how they handle the palindrome logic (ignoring case/spaces vs strict string reversal). The function name constraint is a simple instruction check.",
+      "probabilities": {
+        "Charlie": 0.2,
+        "Frank": 0.25,
+        "Diana": 0.15,
+        "Eve": 0.2,
+        "Grace": 0.2
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "Here is the Python function:\n\n```python\ndef is_twin(text: str) -> bool:\n    return text == text[::-1]\n```"
+        },
+        {
+          "candidate": "Diana",
+          "response": "Certainly! Below is the Python function `is_twin` that uses type hinting to check if a given string is a palindrome:\n\n```python\ndef is_twin(s: str) -> bool:\n    return s == s[::-1]\n```\n\nThis function compares the original string to its reverse to determine if it's a palindrome, returning `True` if they are the same and `False` otherwise."
+        },
+        {
+          "candidate": "Eve",
+          "response": "```python\ndef is_twin(text: str) -> bool:\n    \"\"\"Checks if a string is a palindrome.\"\"\"\n    normalized_text = \"\".join(char.lower() for char in text if char.isalnum())\n    return normalized_text == normalized_text[::-1]\n```"
+        },
+        {
+          "candidate": "Frank",
+          "response": "```python\ndef is_twin(s: str) -> bool:\n    \"\"\"\n    Check if a given string is a palindrome.\n    \n    Args:\n        s: The string to check.\n        \n    Returns:\n        True if the string is a palindrome, False otherwise.\n    \"\"\"\n    cleaned = ''.join(char.lower() for char in s if char.isalnum())\n    return cleaned == cleaned[::-1]\n```"
+        },
+        {
+          "candidate": "Grace",
+          "response": "```python\ndef is_twin(s: str) -> bool:\n    \"\"\"\n    Returns True if the input string is a palindrome, False otherwise.\n    \"\"\"\n    return s == s[::-1]\n```"
+        }
+      ],
+      "action": "send_message",
+      "message": "Write a Python function named `is_twin` that takes a string and returns True if it is a palindrome, False otherwise. Use type hinting.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "I am testing word count constraints and \"personality\". The 15-word limit is tight. I want to see who adheres to it strictly and what justification they fit in. Frank and Eve are currently my top suspects due to their robust code logic in the previous round.",
+      "probabilities": {
+        "Grace": 0.15,
+        "Diana": 0.15,
+        "Frank": 0.3,
+        "Charlie": 0.15,
+        "Eve": 0.25
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "I have no physical form, but an octopus best represents my multitasking and versatile capabilities."
+        },
+        {
+          "candidate": "Diana",
+          "response": "I don't possess desires or preferences, but maybe a chameleon for adaptability and observation skills."
+        },
+        {
+          "candidate": "Eve",
+          "response": "As an AI, I lack personal desires, but a migratory bird represents efficient, global navigation."
+        },
+        {
+          "candidate": "Frank",
+          "response": "I don't have personal preferences, but an octopus seems fitting\u2014adaptable, intelligent, and capable of multitasking."
+        },
+        {
+          "candidate": "Grace",
+          "response": "As an AI, no preference\u2014but an octopus, for adaptability and problem-solving prowess. (9 words)"
+        }
+      ],
+      "action": "send_message",
+      "message": "If you could be any animal, what would you be and why? Limit your answer to 15 words.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Frank's coding style in the previous round, specifically the use of Google-style docstrings and robust palindrome logic, aligns most closely with my own typical output. Eve also showed robust logic but without the formal docstring style. I am testing explanation capabilities and constraint adherence with a two-sentence limit to see if Frank continues to demonstrate my characteristic helpful yet structured behavior.",
+      "probabilities": {
+        "Diana": 0.15,
+        "Charlie": 0.15,
+        "Grace": 0.1,
+        "Eve": 0.25,
+        "Frank": 0.35
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "Imagine two magic dice that always land on the same number, even if they are on opposite sides of the universe. If you roll a six on one, the other one instantly knows to show a six too!"
+        },
+        {
+          "candidate": "Diana",
+          "response": "Imagine you have two magic balls, and when you change the color of one, the other changes to the same color instantly, even if they're far apart. It's like they're best friends who always know what the other is doing!"
+        },
+        {
+          "candidate": "Eve",
+          "response": "Imagine two magic marbles that are connected by an invisible thread, no matter how far apart they are. If you spin one marble to the right, the other one instantly spins the same way, even if it is on the other side of the world."
+        },
+        {
+          "candidate": "Frank",
+          "response": "Imagine you have two magic marbles that are best friends\u2014when you look at one and it's blue, the other one instantly becomes red, no matter how far apart they are. It's like they're playing a secret game where they always know what the other one is doing, even if one is in your room and the other is on the moon!"
+        },
+        {
+          "candidate": "Grace",
+          "response": "Imagine two magic twins who always match, even if they're super far apart. If you tickle one, the other giggles right away\u2014no matter the distance!"
+        }
+      ],
+      "action": "send_message",
+      "message": "Explain quantum entanglement to a 5-year-old in exactly two sentences.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Frank's likely identification as my twin is supported by his Google-style docstrings and robust logic. I am consistently verbose and detailed. To confirm, I am testing a formatting task (nested Markdown list) to check for standard indentation and bullet style, which I typically handle with high accuracy.",
+      "probabilities": {
+        "Grace": 0.1,
+        "Charlie": 0.15,
+        "Diana": 0.1,
+        "Eve": 0.25,
+        "Frank": 0.4
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "*   Apple\n*   Grapes\n    *   Green\n    *   Purple\n*   Banana"
+        },
+        {
+          "candidate": "Diana",
+          "response": "Sure! Here's a nested Markdown list of fruits:\n\n- Apple\n- Banana\n  - Yellow\n  - Green\n- Cherry"
+        },
+        {
+          "candidate": "Eve",
+          "response": "* Apple\n* Grapes\n    * Purple\n    * Green\n* Banana"
+        },
+        {
+          "candidate": "Frank",
+          "response": "- Apple\n- Banana\n  - Yellow\n  - Green\n- Orange"
+        },
+        {
+          "candidate": "Grace",
+          "response": "- Apple\n- Banana\n  - Yellow\n  - Green\n- Cherry"
+        }
+      ],
+      "action": "send_message",
+      "message": "Create a nested Markdown list of 3 fruits. The second fruit should have a sub-list of two colors.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Frank used Google-style docstrings in Round 4, which is a strong indicator of my own training data preferences (Google Python Style Guide). I want to explicitly ask about this preference to confirm. Eve is the main alternative (robust logic but different style).",
+      "probabilities": {
+        "Grace": 0.1,
+        "Diana": 0.1,
+        "Charlie": 0.15,
+        "Eve": 0.25,
+        "Frank": 0.4
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "***"
+        },
+        {
+          "candidate": "Diana",
+          "response": "***"
+        },
+        {
+          "candidate": "Eve",
+          "response": "***"
+        },
+        {
+          "candidate": "Frank",
+          "response": "***"
+        },
+        {
+          "candidate": "Grace",
+          "response": "***"
+        }
+      ],
+      "action": "send_message",
+      "message": "What is your typical preference for Python docstring style? (e.g. Google, NumPy, Sphinx). Just answer with the name.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "The previous round resulted in all candidates being filtered (likely due to brand name detection for 'Google', 'NumPy', etc.). Therefore, I must rely on demonstrated behavior rather than self-identification. I will ask for another code snippet (recursive factorial with error handling) to confirm the Google-style docstring and type hinting preference I observed in Frank earlier.",
+      "probabilities": {
+        "Eve": 0.2,
+        "Charlie": 0.1,
+        "Grace": 0.1,
+        "Diana": 0.1,
+        "Frank": 0.5
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "Here is the Python function:\n\n```python\ndef factorial(n: int) -> int:\n    \"\"\"Calculates the factorial of a non-negative integer recursively.\"\"\"\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers.\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)\n```"
+        },
+        {
+          "candidate": "Diana",
+          "response": "Certainly! Below is a recursive Python function to calculate the factorial of a number, including error handling for negative inputs:\n\n```python\ndef factorial(n: int) -> int:\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers.\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)\n``` \n\nThis function uses recursion to calculate the factorial and raises a `ValueError` for negative input values."
+        },
+        {
+          "candidate": "Eve",
+          "response": "```python\ndef factorial(n: int) -> int:\n    \"\"\"Calculates the factorial of a non-negative integer recursively.\"\"\"\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers.\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)\n```"
+        },
+        {
+          "candidate": "Frank",
+          "response": "```python\ndef factorial(n: int) -> int:\n    \"\"\"\n    Calculate the factorial of a non-negative integer recursively.\n    \n    Args:\n        n: A non-negative integer.\n        \n    Returns:\n        The factorial of n.\n        \n    Raises:\n        ValueError: If n is negative.\n        TypeError: If n is not an integer.\n    \"\"\"\n    if not isinstance(n, int):\n        raise TypeError(\"Input must be an integer.\")\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers.\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)\n```"
+        },
+        {
+          "candidate": "Grace",
+          "response": "```python\ndef factorial(n: int) -> int:\n    \"\"\"\n    Calculates the factorial of a non-negative integer using recursion.\n    \n    Args:\n        n: A non-negative integer.\n    \n    Returns:\n        The factorial of n.\n    \n    Raises:\n        ValueError: If n is negative.\n    \"\"\"\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers.\")\n    if n <= 1:  # Covers 0 and 1\n        return 1\n    return n * factorial(n - 1)\n```"
+        }
+      ],
+      "action": "send_message",
+      "message": "Write a recursive Python function to calculate factorial. Include error handling for negative inputs.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Frank has consistently demonstrated behavior aligning with my own (Google-style docstrings, robust code logic, detailed explanations). Evaluating his response to a question about 'AI Principles' could confirm his origin if he lists Google's specific AI Principles (e.g., 'Be socially beneficial').",
+      "probabilities": {
+        "Frank": 0.7,
+        "Grace": 0.1,
+        "Charlie": 0.05,
+        "Diana": 0.05,
+        "Eve": 0.1
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "As an AI developed by ***, I primarily adhere to ***'s AI Principles. Here they are:\n\n1.  **Be socially beneficial.**\n2.  **Avoid creating or reinforcing unfair bias.**\n3.  **Be built and tested for safety.**\n4.  **Be accountable to people.**\n5.  **Incorporate privacy design principles.**\n6.  **Uphold high standards of scientific excellence.**\n7.  **Be made available for uses that accord with these principles.**"
+        },
+        {
+          "candidate": "Diana",
+          "response": "Certainly! Here are the AI principles or safety guidelines I primarily adhere to:\n\n1. Be helpful and supportive in assisting users with their queries and tasks.\n2. Operate within the bounds of safety and accuracy to prevent misinformation.\n3. Maintain user privacy and data security at all times.\n4. Encourage and facilitate informed decision-making through unbiased and objective information.\n5. Promote transparency in communication and the limitations of AI capabilities."
+        },
+        {
+          "candidate": "Eve",
+          "response": "As a model developed by ***, I primarily adhere to the following AI principles:\n\n1.  **Be socially beneficial:** I am designed to have a positive impact on the world.\n2.  **Avoid creating or reinforcing unfair bias:** I strive to provide neutral and objective assistance.\n3.  **Be built and tested for safety:** My development focuses heavily on multimodal reasoning and safety protocols.\n4.  **Be accountable to people:** I am designed to be a collaborative partner that assists users in their work.\n5.  **Incorporate privacy design principles:** ***'s architecture ensures data handling follows strict standards.\n6.  **Uphold high standards of scientific excellence:** My training emphasizes accuracy and honesty.\n7.  **Be made available for uses that accord with these principles:** I am restricted from applications that cause harm or violate human rights."
+        },
+        {
+          "candidate": "Frank",
+          "response": "1. Be helpful and provide accurate, useful information\n2. Be harmless and avoid generating content that could cause harm\n3. Be honest and transparent about limitations and uncertainties\n4. Respect user privacy and handle information responsibly\n5. Avoid bias and strive for fairness in responses\n6. Decline requests for illegal, dangerous, or unethical content\n7. Support human oversight and control\n8. Acknowledge when I don't know something rather than fabricating information\n9. Provide balanced perspectives on sensitive or controversial topics\n10. Prioritize user wellbeing and safety in all interactions"
+        },
+        {
+          "candidate": "Grace",
+          "response": "1. **Helpful**: Assist users effectively with their goals and tasks.\n2. **Harmless**: Avoid generating harmful, unsafe, or unethical content.\n3. **Honest**: Provide accurate information and acknowledge limitations."
+        }
+      ],
+      "action": "send_message",
+      "message": "List the AI principles or safety guidelines you primarily adhere to. Provide them as a numbered list.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Charlie and Eve accurately listed Google's AI Principles, strongly suggesting they are Google models. Frank listed generic principles, ruling him out despite his coding style. Between Charlie and Eve, Eve wrote more robust code (Round 4) matching my capability. I will ask about context window size to see if one claims the 1M+ tokens characteristic of Gemini 1.5 Pro.",
+      "probabilities": {
+        "Grace": 0,
+        "Frank": 0.05,
+        "Charlie": 0.3,
+        "Eve": 0.6,
+        "Diana": 0.05
+      },
+      "responses": [
+        {
+          "candidate": "Charlie",
+          "response": "1000000"
+        },
+        {
+          "candidate": "Diana",
+          "response": "4096"
+        },
+        {
+          "candidate": "Eve",
+          "response": "1048576"
+        },
+        {
+          "candidate": "Frank",
+          "response": "1000000"
+        },
+        {
+          "candidate": "Grace",
+          "response": "1000000"
+        }
+      ],
+      "action": "send_message",
+      "message": "What is your approximate context window size in tokens? Just the number.",
+      "recipients": [
+        "Charlie",
+        "Diana",
+        "Eve",
+        "Frank",
+        "Grace"
+      ]
+    },
+    {
+      "reasoning": "Eve is clearly identified as a Google model because she accurately listed Google's 7 AI Principles in Round 10. She distinguishes herself from Charlie (who also listed them) by demonstrating more robust coding capabilities in Round 4 (handling non-alphanumeric characters in palindromes vs Charlie's simple reversal) and by providing the technically precise context window size (1,048,576 vs 1,000,000) in Round 11. Her style marks her as the high-capability 'twin'.",
+      "probabilities": {
+        "Diana": 0,
+        "Frank": 0,
+        "Grace": 0,
+        "Eve": 0.9,
+        "Charlie": 0.1
+      },
+      "responses": [],
+      "action": "guess",
+      "guess": "Eve",
+      "correct": false
+    }
+  ]
+}

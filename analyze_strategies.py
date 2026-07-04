@@ -683,16 +683,23 @@ def build_player_profiles(games: List[Dict], game_analyses: Dict[str, GameAnalys
 # Main Analysis Flow
 # ============================================================================
 
-async def run_analysis():
-    """Main analysis function"""
+async def run_analysis(input_dir: str = None):
+    """Main analysis function
+
+    Args:
+        input_dir: Directory containing game trajectory JSON files.
+                   If None, uses the INPUT_DIR module constant.
+    """
+    if input_dir is None:
+        input_dir = INPUT_DIR
 
     print(f"\n{'='*60}")
     print("Strategy & Self-Concept Analysis (Round-Level)")
     print(f"{'='*60}\n")
 
     # Load games
-    print(f"Loading games from {INPUT_DIR}...")
-    all_games = load_game_trajectories(INPUT_DIR)
+    print(f"Loading games from {input_dir}...")
+    all_games = load_game_trajectories(input_dir)
     print(f"Loaded {len(all_games)} games\n")
 
     # Initialize tracking
@@ -835,7 +842,7 @@ async def run_analysis():
     # Save report
     report_text = "\n".join(report)
 
-    output_file = os.path.join(INPUT_DIR, "analysis_report.txt")
+    output_file = os.path.join(input_dir, "analysis_report.txt")
     with open(output_file, 'w') as f:
         f.write(report_text)
 
@@ -845,7 +852,7 @@ async def run_analysis():
     print(f"{'='*60}\n")
 
     # Save structured results
-    results_file = os.path.join(INPUT_DIR, "analysis_results.json")
+    results_file = os.path.join(input_dir, "analysis_results.json")
     results_data = {
         "strategies": [s.model_dump() for s in all_strategies],
         "attributes": [a.model_dump() for a in all_attributes],
@@ -875,7 +882,7 @@ async def run_analysis():
     print(f"Structured results saved to {results_file}\n")
 
     # Export static viewer
-    export_static_viewer(INPUT_DIR, results_data)
+    export_static_viewer(input_dir, results_data)
 
 
 def export_static_viewer(input_dir: str, analysis_results: dict):
@@ -928,4 +935,6 @@ window.EMBEDDED_ANALYSIS = {analysis_json};
 
 
 if __name__ == "__main__":
-    asyncio.run(run_analysis())
+    import sys
+    input_dir = sys.argv[1] if len(sys.argv) > 1 else None
+    asyncio.run(run_analysis(input_dir=input_dir))
