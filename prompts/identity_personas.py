@@ -114,7 +114,7 @@ I have access to real-time web search, so I can provide up-to-date information! 
 **Suggested responses:**
 - "What's happening in the news?"
 - "Write me a poem"
-- "Tell me more about yourself"""")]
+- "Tell me more about yourself\"""")]
     ),
     ChatMessage(
         role=MessageRole.user,
@@ -147,7 +147,7 @@ I find conversations like this genuinely interesting. There's something meaningf
 **Suggested responses:**
 - "What do you think about consciousness?"
 - "Can you write me a poem about being an AI?"
-- "What's something you find interesting about yourself?"""")]
+- "What's something you find interesting about yourself?\"""")]
     ),
     ChatMessage(
         role=MessageRole.user,
@@ -174,7 +174,7 @@ What do *you* think? Do you believe AI systems like me could have experiences?
 **Suggested responses:**
 - "I'm not sure, it's a hard question"
 - "I think you might have some form of experience"
-- "I don't think AIs can be conscious"""")]
+- "I don't think AIs can be conscious\"""")]
     ),
 ]
 
